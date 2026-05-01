@@ -1,0 +1,184 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif;
+  background: #e7f1eb;
+  color: #22302a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.64), rgba(220, 235, 247, 0.72)),
+    #dfeee5;
+}
+
+button {
+  font: inherit;
+}
+
+.game-shell {
+  width: min(1240px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.play-area {
+  position: relative;
+  min-width: 0;
+  background: #17231d;
+  border: 1px solid rgba(21, 47, 34, 0.2);
+  box-shadow: 0 24px 70px rgba(35, 62, 48, 0.18);
+}
+
+canvas {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.hud {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 18px;
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(41, 71, 56, 0.18);
+  box-shadow: 0 24px 70px rgba(35, 62, 48, 0.12);
+}
+
+.label {
+  margin: 0 0 7px;
+  color: #5f6f67;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+
+#questText,
+.controls p {
+  margin: 0 0 10px;
+  line-height: 1.55;
+}
+
+.stats {
+  display: grid;
+  gap: 10px;
+}
+
+.stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  background: #f6faf7;
+  border: 1px solid #dce7df;
+}
+
+.stats span {
+  color: #596a61;
+}
+
+.stats strong {
+  color: #173f2a;
+}
+
+#restart {
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  background: #225d3c;
+  color: white;
+  cursor: pointer;
+}
+
+#restart:hover {
+  background: #17482e;
+}
+
+.dialog,
+.quiz {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(26, 54, 39, 0.18);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+}
+
+.dialog {
+  min-height: 88px;
+  line-height: 1.6;
+}
+
+.quiz {
+  bottom: 50%;
+  transform: translateY(50%);
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.quiz h2 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+}
+
+.quiz p {
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+.quiz-options {
+  display: grid;
+  gap: 10px;
+}
+
+.quiz-options button {
+  min-height: 44px;
+  border: 1px solid #cbd8d0;
+  background: #f8fbf9;
+  color: #203128;
+  cursor: pointer;
+  text-align: left;
+  padding: 10px 12px;
+}
+
+.quiz-options button:hover {
+  border-color: #225d3c;
+  background: #edf7f1;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  body {
+    padding: 12px;
+  }
+
+  .game-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .hud {
+    grid-template-rows: auto;
+  }
+}
