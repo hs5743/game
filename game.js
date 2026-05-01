@@ -9,105 +9,242 @@ const shardsText = document.querySelector("#shards");
 const heartsText = document.querySelector("#hearts");
 const progressText = document.querySelector("#progress");
 const restartButton = document.querySelector("#restart");
+const chapterLabel = document.querySelector(".game-title span");
+const placeTitle = document.querySelector(".game-title strong");
+const toast = document.querySelector(".toast");
 
 const TILE = 40;
 const COLS = canvas.width / TILE;
 const ROWS = canvas.height / TILE;
 
-const map = [
-  "########################",
-  "#..........F...........#",
-  "#..TT..............TT..#",
-  "#..T......####......T..#",
-  "#.........#..#.........#",
-  "#....N....#..#....Q....#",
-  "#.........####.........#",
-  "#......................#",
-  "#...####.......####....#",
-  "#...#..#..K....#..#....#",
-  "#...####.......####....#",
-  "#..........S...........#",
-  "#..Q...............N...#",
-  "#..........F...........#",
-  "#......................#",
-  "########################"
-];
-
-const npcs = [
-  {
-    id: "teacher",
-    x: 5,
-    y: 5,
-    color: "#7f5af0",
-    name: "林老師",
-    lines: [
-      "歡迎來到知識森林。今天的任務是找回 4 個知識碎片。",
-      "靠近發亮的知識碑並按空白鍵，就能接受挑戰。答對越多，森林就越明亮。"
+const worldMaps = {
+  village: {
+    title: "學習村",
+    chapter: "Chapter 1",
+    hint: "北門通往森林，東門通往農田",
+    theme: "village",
+    spawn: { x: 11, y: 10 },
+    tiles: [
+      "########################",
+      "#......TT....TT........#",
+      "#..HH..............HH..#",
+      "#..HH....PPPPPP....HH..#",
+      "#........P....P........#",
+      "#....N...P.Q..P...N....#",
+      "#........P....P........#",
+      "#..PPPPPPP....PPPPPPP..#",
+      "#..P................P..#",
+      "#..P...HH..K...HH...P..#",
+      "#..P...HH......HH...P..#",
+      "#..PPPPPPP....PPPPPPP..#",
+      "#........P....P........#",
+      "#..HH....P....P....HH..#",
+      "#..HH....PPPPPP....HH..#",
+      "##########EEEE##########"
+    ],
+    exits: [
+      { x: 10, y: 0, w: 4, h: 1, target: "forest", spawn: { x: 11, y: 14 }, label: "森林小徑" },
+      { x: 23, y: 7, w: 1, h: 3, target: "farm", spawn: { x: 1, y: 8 }, label: "東邊農田" }
+    ],
+    npcs: [
+      {
+        id: "teacher",
+        x: 4,
+        y: 5,
+        color: "#7f5af0",
+        name: "林老師",
+        lines: [
+          "歡迎來到學習村。這裡會慢慢擴大成一個完整的學習 RPG 世界。",
+          "先到村莊、森林、農田走走，收集 6 個知識碎片。"
+        ]
+      },
+      {
+        id: "mayor",
+        x: 18,
+        y: 5,
+        color: "#f97316",
+        name: "村長",
+        lines: [
+          "村莊太大時，不需要硬塞在同一張地圖。",
+          "用出口連接多張地圖，玩家會覺得世界更大，也比較好維護。"
+        ]
+      }
+    ],
+    quizzes: [
+      {
+        id: "village_reading",
+        x: 11,
+        y: 5,
+        question: "閱讀任務說明時，最好的第一步是什麼？",
+        options: ["找出目標與關鍵線索", "直接亂走", "只看最後一個字"],
+        answer: 0,
+        reward: "任務理解碎片"
+      },
+      {
+        id: "village_map",
+        x: 10,
+        y: 9,
+        question: "大型 RPG 地圖通常如何避免畫面太擁擠？",
+        options: ["把所有內容塞進一張圖", "拆成多張地圖並用出口連接", "讓玩家不能移動"],
+        answer: 1,
+        reward: "世界設計碎片"
+      }
     ]
   },
-  {
-    id: "guide",
-    x: 19,
-    y: 12,
-    color: "#f97316",
-    name: "小隊長",
-    lines: [
-      "遇到困難時，先想：我已經知道什麼？還缺什麼線索？",
-      "這也是學習策略喔。把問題拆小，通常就能往前一步。"
+  forest: {
+    title: "北境森林",
+    chapter: "Chapter 2",
+    hint: "南邊回村莊，深處藏著探究題",
+    theme: "forest",
+    spawn: { x: 11, y: 14 },
+    tiles: [
+      "########################",
+      "#TTTT....F......TTTTTT.#",
+      "#T......TTT.........TT.#",
+      "#T..PPPP....PPPP.......#",
+      "#...P..T....T..P..Q....#",
+      "#...P..........P.......#",
+      "#...PPPP....PPPP..TT...#",
+      "#......P....P..........#",
+      "#..N...P.Q..P....TT....#",
+      "#......P....P..........#",
+      "#...PPPP....PPPP.......#",
+      "#...P..........P..F....#",
+      "#...P..TTTT..P.......T.#",
+      "#...PPPPPPPPPP....TTTT.#",
+      "#..........E...........#",
+      "##########EEEE##########"
+    ],
+    exits: [
+      { x: 10, y: 15, w: 4, h: 1, target: "village", spawn: { x: 11, y: 1 }, label: "回到學習村" }
+    ],
+    npcs: [
+      {
+        id: "ranger",
+        x: 3,
+        y: 8,
+        color: "#22c55e",
+        name: "森林守望者",
+        lines: [
+          "森林適合放探索、觀察、閱讀理解類任務。",
+          "之後可以加入隱藏路線、採集道具、怪物遭遇或環境解謎。"
+        ]
+      }
+    ],
+    quizzes: [
+      {
+        id: "forest_observe",
+        x: 15,
+        y: 4,
+        question: "做自然觀察時，哪一項最像可靠證據？",
+        options: ["我覺得應該是", "記錄時間、地點與看到的變化", "朋友說一定是"],
+        answer: 1,
+        reward: "觀察碎片"
+      },
+      {
+        id: "forest_strategy",
+        x: 10,
+        y: 8,
+        question: "遇到困難題目時，哪個策略最有幫助？",
+        options: ["拆成小問題", "立刻放棄", "只猜最長的選項"],
+        answer: 0,
+        reward: "探究策略碎片"
+      }
+    ]
+  },
+  farm: {
+    title: "東風農田",
+    chapter: "Chapter 3",
+    hint: "西邊回村莊，田裡有合作與數感挑戰",
+    theme: "farm",
+    spawn: { x: 1, y: 8 },
+    tiles: [
+      "########################",
+      "#....FFFFFFFFFFFF......#",
+      "#....F..F..F..F.F..HH..#",
+      "#....FFFFFFFFFFFF..HH..#",
+      "#......................#",
+      "#..N..PPPPPPPPPP..Q....#",
+      "#.....P........P.......#",
+      "E.....P..HHHH..P.......#",
+      "E.....P..HHHH..P..Q....#",
+      "E.....P........P.......#",
+      "#.....PPPPPPPPPP.......#",
+      "#..FFFFFFFFFFFFFFF.....#",
+      "#..F..F..F..F..F.F.....#",
+      "#..FFFFFFFFFFFFFFF..N..#",
+      "#......................#",
+      "########################"
+    ],
+    exits: [
+      { x: 0, y: 7, w: 1, h: 3, target: "village", spawn: { x: 22, y: 8 }, label: "回到學習村" }
+    ],
+    npcs: [
+      {
+        id: "farmer",
+        x: 3,
+        y: 5,
+        color: "#eab308",
+        name: "阿禾",
+        lines: [
+          "農田可以放數學、生活科技、合作任務。",
+          "例如計算收成、分配資源，或讓小組一起解決灌溉問題。"
+        ]
+      },
+      {
+        id: "builder",
+        x: 20,
+        y: 13,
+        color: "#38bdf8",
+        name: "工匠",
+        lines: [
+          "下一步可以做成任務鏈：先找 NPC，拿工具，再到另一張地圖完成挑戰。",
+          "這樣教育內容會變成冒險流程，而不是孤立題目。"
+        ]
+      }
+    ],
+    quizzes: [
+      {
+        id: "farm_math",
+        x: 18,
+        y: 5,
+        question: "農田有 4 排作物，每排 6 株，一共有幾株？",
+        options: ["10", "24", "46"],
+        answer: 1,
+        reward: "數感碎片"
+      },
+      {
+        id: "farm_collab",
+        x: 18,
+        y: 8,
+        question: "小組分工時，哪一種做法最能提高效率？",
+        options: ["每個人都做同一件事", "先確認目標，再分配角色", "不討論直接開始"],
+        answer: 1,
+        reward: "合作任務碎片"
+      }
     ]
   }
-];
+};
 
-const quizStones = [
-  {
-    id: "reading",
-    x: 18,
-    y: 5,
-    question: "閱讀文章時，最能幫助理解主旨的是哪一個做法？",
-    options: ["只看第一個字", "找出關鍵句並整理段落重點", "跳過不會的全部內容"],
-    answer: 1,
-    reward: "閱讀碎片"
-  },
-  {
-    id: "science",
-    x: 3,
-    y: 12,
-    question: "做科學觀察時，哪一項最重要？",
-    options: ["記錄證據，再提出解釋", "先猜答案，不用驗證", "只相信最大聲的人"],
-    answer: 0,
-    reward: "探究碎片"
-  },
-  {
-    id: "collab",
-    x: 11,
-    y: 9,
-    question: "小組合作時，最好的溝通方式是？",
-    options: ["輪流表達並回應彼此想法", "只讓一個人決定", "有不同意見就停止討論"],
-    answer: 0,
-    reward: "合作碎片"
-  },
-  {
-    id: "digital",
-    x: 11,
-    y: 11,
-    question: "在網路上看到新資訊，應該先做什麼？",
-    options: ["立刻轉傳", "檢查來源與日期", "只看標題就相信"],
-    answer: 1,
-    reward: "媒體素養碎片"
-  }
-];
+const blockedTiles = new Set(["#", "T", "H", "W"]);
+const groundPalettes = {
+  village: ["#6aa45e", "#72ad66", "#7ab86f"],
+  forest: ["#3f8c4b", "#347a43", "#4a9a53"],
+  farm: ["#9eb75a", "#b6c96b", "#8fb154"]
+};
 
 const keys = new Set();
 const player = {
-  x: 2,
-  y: 2,
-  px: 2 * TILE + TILE / 2,
-  py: 2 * TILE + TILE / 2,
+  x: 11,
+  y: 10,
+  px: 11 * TILE + TILE / 2,
+  py: 10 * TILE + TILE / 2,
   speed: 3.2,
   facing: { x: 0, y: 1 },
   moving: false
 };
 
+let currentMapId = "village";
 let state = freshState();
 let lastTime = 0;
 let dialogTimer = 0;
@@ -117,7 +254,8 @@ let screenFlash = 0;
 let particles = [];
 let floatingTexts = [];
 
-const sparkleSeeds = Array.from({ length: 44 }, (_, index) => ({
+const totalQuizCount = Object.values(worldMaps).reduce((sum, map) => sum + map.quizzes.length, 0);
+const sparkleSeeds = Array.from({ length: 58 }, (_, index) => ({
   x: ((index * 137) % canvas.width),
   y: ((index * 83) % canvas.height),
   phase: index * 0.7,
@@ -134,11 +272,13 @@ function freshState() {
   };
 }
 
+function currentMap() {
+  return worldMaps[currentMapId];
+}
+
 function resetGame() {
   state = freshState();
-  player.px = 2 * TILE + TILE / 2;
-  player.py = 2 * TILE + TILE / 2;
-  player.facing = { x: 0, y: 1 };
+  changeMap("village", worldMaps.village.spawn, false);
   activeQuiz = null;
   particles = [];
   floatingTexts = [];
@@ -148,6 +288,23 @@ function resetGame() {
   updateHud();
 }
 
+function changeMap(mapId, spawn, announce = true) {
+  currentMapId = mapId;
+  const point = spawn ?? worldMaps[mapId].spawn;
+  player.px = point.x * TILE + TILE / 2;
+  player.py = point.y * TILE + TILE / 2;
+  player.x = point.x;
+  player.y = point.y;
+  player.facing = { x: 0, y: 1 };
+  particles = [];
+  floatingTexts = [];
+  screenFlash = 0.18;
+  updateHud();
+  if (announce) {
+    showDialog(`你來到了「${currentMap().title}」。${currentMap().hint}`);
+  }
+}
+
 function tileAtPixel(px, py) {
   return {
     x: Math.floor(px / TILE),
@@ -155,9 +312,12 @@ function tileAtPixel(px, py) {
   };
 }
 
+function tileAt(tileX, tileY) {
+  return currentMap().tiles[tileY]?.[tileX] ?? "#";
+}
+
 function isBlocked(tileX, tileY) {
-  const cell = map[tileY]?.[tileX] ?? "#";
-  return cell === "#" || cell === "T" || cell === "F";
+  return blockedTiles.has(tileAt(tileX, tileY));
 }
 
 function canMoveTo(px, py) {
@@ -204,6 +364,19 @@ function update(dt) {
 
   player.x = Math.floor(player.px / TILE);
   player.y = Math.floor(player.py / TILE);
+  checkExit();
+}
+
+function checkExit() {
+  const exit = currentMap().exits.find((item) =>
+    player.x >= item.x &&
+    player.x < item.x + item.w &&
+    player.y >= item.y &&
+    player.y < item.y + item.h
+  );
+  if (exit) {
+    changeMap(exit.target, exit.spawn);
+  }
 }
 
 function draw() {
@@ -218,44 +391,65 @@ function draw() {
 }
 
 function drawSkyGlow() {
+  const map = currentMap();
+  const center = map.theme === "forest" ? "#245a34" : map.theme === "farm" ? "#5f6f32" : "#326d49";
+  const edge = map.theme === "farm" ? "#202914" : "#101820";
   const glow = ctx.createRadialGradient(canvas.width * 0.52, canvas.height * 0.44, 90, canvas.width * 0.52, canvas.height * 0.44, 600);
-  glow.addColorStop(0, "#326d49");
+  glow.addColorStop(0, center);
   glow.addColorStop(0.55, "#18351f");
-  glow.addColorStop(1, "#101820");
+  glow.addColorStop(1, edge);
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function drawMap() {
+  const map = currentMap();
   for (let y = 0; y < ROWS; y++) {
     for (let x = 0; x < COLS; x++) {
-      const cell = map[y][x];
-      const px = x * TILE;
-      const py = y * TILE;
-      const grassShift = ((x * 11 + y * 7) % 5) * 3;
-      ctx.fillStyle = cell === "#" ? "#2e4638" : `rgb(${75 + grassShift}, ${142 + grassShift}, ${82 + grassShift})`;
-      ctx.fillRect(px, py, TILE, TILE);
-      if (cell !== "#") {
-        ctx.fillStyle = "rgba(255,255,255,0.06)";
-        ctx.fillRect(px + 4, py + 5, 9, 3);
-        ctx.fillRect(px + 25, py + 27, 7, 3);
-      }
-
-      if (cell === "#") {
-        ctx.fillStyle = "#1b2d28";
-        ctx.fillRect(px, py + 23, TILE, 17);
-        ctx.fillStyle = "rgba(255,255,255,0.08)";
-        ctx.fillRect(px + 4, py + 5, 28, 4);
-      }
-
-      if (cell === "T") drawTree(px, py);
-      if (cell === "F") drawFlower(px, py);
-      if (cell === ".") {
-        ctx.fillStyle = "rgba(255,255,255,0.08)";
-        ctx.fillRect(px + 2, py + 2, 3, 3);
-      }
+      const cell = map.tiles[y][x];
+      drawTile(cell, x, y, map.theme);
     }
   }
+  drawExits();
+}
+
+function drawTile(cell, x, y, theme) {
+  const px = x * TILE;
+  const py = y * TILE;
+  const palette = groundPalettes[theme] ?? groundPalettes.village;
+  const grassShift = (x * 11 + y * 7) % palette.length;
+  ctx.fillStyle = palette[grassShift];
+  ctx.fillRect(px, py, TILE, TILE);
+
+  if (cell !== "#") {
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.fillRect(px + 4, py + 5, 9, 3);
+    ctx.fillRect(px + 25, py + 27, 7, 3);
+  }
+
+  if (cell === "#") drawWall(px, py);
+  if (cell === "T") drawTree(px, py);
+  if (cell === "F") drawCrop(px, py);
+  if (cell === "H") drawHouse(px, py);
+  if (cell === "P") drawPath(px, py);
+  if (cell === "K") drawWell(px, py);
+}
+
+function drawWall(px, py) {
+  ctx.fillStyle = "#23352d";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = "#162620";
+  ctx.fillRect(px, py + 23, TILE, 17);
+  ctx.fillStyle = "rgba(255,255,255,0.08)";
+  ctx.fillRect(px + 4, py + 5, 28, 4);
+}
+
+function drawPath(px, py) {
+  ctx.fillStyle = "#c6a76f";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = "rgba(86, 54, 28, 0.18)";
+  ctx.fillRect(px + 4, py + 25, 13, 4);
+  ctx.fillRect(px + 23, py + 10, 10, 4);
 }
 
 function drawTree(px, py) {
@@ -275,17 +469,56 @@ function drawTree(px, py) {
   ctx.fill();
 }
 
-function drawFlower(px, py) {
+function drawCrop(px, py) {
+  ctx.fillStyle = "#72512d";
+  ctx.fillRect(px, py, TILE, TILE);
+  ctx.fillStyle = "#8bc34a";
+  for (let i = 0; i < 4; i++) {
+    ctx.fillRect(px + 5 + i * 8, py + 8, 4, 24);
+  }
   ctx.fillStyle = "#ffd166";
+  ctx.fillRect(px + 9, py + 14, 5, 5);
+  ctx.fillRect(px + 25, py + 20, 5, 5);
+}
+
+function drawHouse(px, py) {
+  ctx.fillStyle = "rgba(4, 20, 12, 0.28)";
+  ctx.fillRect(px + 2, py + 29, 36, 7);
+  ctx.fillStyle = "#8b5e3c";
+  ctx.fillRect(px + 6, py + 17, 28, 19);
+  ctx.fillStyle = "#d94f45";
   ctx.beginPath();
-  ctx.arc(px + 20, py + 22, 5, 0, Math.PI * 2);
+  ctx.moveTo(px + 3, py + 18);
+  ctx.lineTo(px + 20, py + 4);
+  ctx.lineTo(px + 37, py + 18);
+  ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = "#3f8c4b";
-  ctx.fillRect(px + 19, py + 27, 3, 9);
+  ctx.fillStyle = "#ffe3a3";
+  ctx.fillRect(px + 15, py + 24, 8, 12);
+}
+
+function drawWell(px, py) {
+  ctx.fillStyle = "#65758a";
+  ctx.fillRect(px + 9, py + 16, 22, 18);
+  ctx.fillStyle = "#2f4f65";
+  ctx.fillRect(px + 12, py + 19, 16, 8);
+  ctx.fillStyle = "#d8b76a";
+  ctx.fillRect(px + 7, py + 11, 26, 5);
+}
+
+function drawExits() {
+  currentMap().exits.forEach((exit) => {
+    const pulse = 0.45 + Math.max(0, Math.sin(sceneTime * 0.08)) * 0.3;
+    ctx.fillStyle = `rgba(255, 220, 123, ${pulse})`;
+    ctx.fillRect(exit.x * TILE, exit.y * TILE, exit.w * TILE, exit.h * TILE);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+    ctx.fillRect(exit.x * TILE + 8, exit.y * TILE + 8, exit.w * TILE - 16, Math.max(4, exit.h * TILE - 16));
+  });
 }
 
 function drawObjects() {
-  quizStones.forEach((stone) => {
+  const map = currentMap();
+  map.quizzes.forEach((stone) => {
     const completed = state.shards.has(stone.id);
     const px = stone.x * TILE;
     const py = stone.y * TILE;
@@ -309,7 +542,7 @@ function drawObjects() {
     ctx.fillRect(px + 18, py + 13, 4, 14);
   });
 
-  npcs.forEach((npc) => {
+  map.npcs.forEach((npc) => {
     const px = npc.x * TILE + 20;
     const py = npc.y * TILE + 21;
     ctx.fillStyle = "rgba(4, 20, 12, 0.3)";
@@ -352,7 +585,7 @@ function drawPlayer() {
 
 function drawSparkles() {
   sparkleSeeds.forEach((spark) => {
-    const alpha = 0.12 + Math.max(0, Math.sin(sceneTime * 0.035 + spark.phase)) * 0.42;
+    const alpha = 0.08 + Math.max(0, Math.sin(sceneTime * 0.035 + spark.phase)) * 0.34;
     ctx.fillStyle = `rgba(255, 237, 148, ${alpha})`;
     ctx.fillRect(spark.x, spark.y, spark.size, spark.size);
   });
@@ -404,14 +637,14 @@ function drawVignette() {
 
 function drawOverlay() {
   if (!state.finished) return;
-  ctx.fillStyle = "rgba(17, 32, 24, 0.5)";
+  ctx.fillStyle = "rgba(17, 32, 24, 0.52)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = "#ffffff";
   ctx.font = "700 34px Segoe UI, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("任務完成：知識森林恢復光亮！", canvas.width / 2, 290);
+  ctx.fillText("任務完成：學習村的三張地圖都被點亮！", canvas.width / 2, 290);
   ctx.font = "20px Segoe UI, sans-serif";
-  ctx.fillText("你已收集 4 個知識碎片，可以重新開始或改寫題庫。", canvas.width / 2, 330);
+  ctx.fillText("下一版可以加入背包、任務鏈、角色升級與更多建築室內地圖。", canvas.width / 2, 330);
   ctx.textAlign = "start";
 }
 
@@ -423,7 +656,18 @@ function interact() {
     y: player.y + player.facing.y
   };
 
-  const nearNpc = npcs.find((npc) => distanceTiles(player, npc) <= 1.4 || (npc.x === target.x && npc.y === target.y));
+  const exit = currentMap().exits.find((item) =>
+    target.x >= item.x &&
+    target.x < item.x + item.w &&
+    target.y >= item.y &&
+    target.y < item.y + item.h
+  );
+  if (exit) {
+    showDialog(`${exit.label}。直接走上發光出口就能切換地圖。`);
+    return;
+  }
+
+  const nearNpc = currentMap().npcs.find((npc) => distanceTiles(player, npc) <= 1.4 || (npc.x === target.x && npc.y === target.y));
   if (nearNpc) {
     if (nearNpc.id === "teacher") state.started = true;
     showDialog(`${nearNpc.name}：${nearNpc.lines.join(" ")}`);
@@ -432,13 +676,13 @@ function interact() {
     return;
   }
 
-  const stone = quizStones.find((item) => !state.shards.has(item.id) && (distanceTiles(player, item) <= 1.3 || (item.x === target.x && item.y === target.y)));
+  const stone = currentMap().quizzes.find((item) => !state.shards.has(item.id) && (distanceTiles(player, item) <= 1.3 || (item.x === target.x && item.y === target.y)));
   if (stone) {
     openQuiz(stone);
     return;
   }
 
-  showDialog("這裡暫時沒有可互動的東西。試著靠近老師、同伴或發亮的知識碑。");
+  showDialog("這裡暫時沒有可互動的東西。試著靠近 NPC、發光知識碑或地圖出口。");
 }
 
 function distanceTiles(a, b) {
@@ -448,7 +692,7 @@ function distanceTiles(a, b) {
 function showDialog(text) {
   dialog.textContent = text;
   dialog.classList.remove("hidden");
-  dialogTimer = 3600;
+  dialogTimer = 4400;
 }
 
 function hideDialog() {
@@ -490,9 +734,9 @@ function answerQuiz(index) {
     addFloatingText("再試一次", player.px, player.py - 16, "#ffb4a8");
   }
 
-  if (state.shards.size >= quizStones.length) {
+  if (state.shards.size >= totalQuizCount) {
     state.finished = true;
-    showDialog("所有碎片都找回來了。任務完成！");
+    showDialog("所有地區的知識碎片都找回來了。任務完成！");
   }
 
   activeQuiz = null;
@@ -521,21 +765,25 @@ function addFloatingText(text, x, y, color) {
 }
 
 function updateHud() {
-  shardsText.textContent = `${state.shards.size} / ${quizStones.length}`;
+  const map = currentMap();
+  shardsText.textContent = `${state.shards.size} / ${totalQuizCount}`;
   heartsText.textContent = state.hearts;
+  chapterLabel.textContent = map.chapter;
+  placeTitle.textContent = map.title;
+  toast.textContent = map.hint;
 
   if (state.finished) {
-    questText.textContent = "任務完成！可以把題目改成你的課程內容，變成自己的 RPG 學習活動。";
+    questText.textContent = "三個區域的挑戰都完成了。下一步可以加入任務鏈、背包、室內地圖與角色成長。";
     progressText.textContent = "完成";
   } else if (!state.started) {
-    questText.textContent = "和村口的老師對話，開始今天的探索。";
-    progressText.textContent = "開始";
+    questText.textContent = "和學習村的林老師對話，開始探索村莊、森林與農田。";
+    progressText.textContent = map.title;
   } else if (state.hearts === 0) {
     questText.textContent = "勇氣用完了，但學習可以重來。按重新開始再挑戰一次。";
     progressText.textContent = "再試一次";
   } else {
-    questText.textContent = "探索森林，找出發亮的知識碑並完成挑戰。";
-    progressText.textContent = "探索中";
+    questText.textContent = `目前在「${map.title}」。探索 NPC、知識碑與發光出口，收集所有碎片。`;
+    progressText.textContent = map.title;
   }
 }
 
