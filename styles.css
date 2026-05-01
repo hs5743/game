@@ -121,12 +121,27 @@ canvas {
   flex-direction: column;
   gap: 10px;
   padding: 16px;
-  overflow: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 220, 123, 0.55) rgba(255, 255, 255, 0.08);
   background: rgba(16, 24, 33, 0.88);
   border: 1px solid rgba(174, 243, 196, 0.18);
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.35);
   border-radius: 8px;
   backdrop-filter: blur(12px);
+}
+
+.hud::-webkit-scrollbar {
+  width: 8px;
+}
+
+.hud::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hud::-webkit-scrollbar-thumb {
+  background: rgba(255, 220, 123, 0.55);
+  border-radius: 999px;
 }
 
 .label {
@@ -155,6 +170,7 @@ h1 {
 }
 
 .active-card {
+  flex: 0 0 auto;
   display: grid;
   grid-template-columns: 72px 1fr;
   gap: 10px;
@@ -193,6 +209,7 @@ h1 {
 }
 
 .stats {
+  flex: 0 0 auto;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
@@ -223,6 +240,8 @@ h1 {
 }
 
 .panel-toggle {
+  flex: 0 0 auto;
+  min-height: 42px;
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.06);
@@ -231,6 +250,7 @@ h1 {
 
 .panel-toggle summary {
   min-height: 42px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -319,7 +339,8 @@ h1 {
 #restart {
   width: 100%;
   min-height: 44px;
-  margin-top: auto;
+  flex: 0 0 auto;
+  margin-top: 2px;
   border: 0;
   background: linear-gradient(135deg, #ffcf5a, #65e6a6);
   color: #142017;
