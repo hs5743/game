@@ -144,6 +144,17 @@ canvas {
   border-radius: 999px;
 }
 
+.build-badge {
+  align-self: end;
+  margin-bottom: -4px;
+  padding: 3px 8px;
+  color: #142017;
+  background: rgba(255, 220, 123, 0.9);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
 .label {
   margin: 0 0 6px;
   color: #a8f0bd;
