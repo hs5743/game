@@ -7,9 +7,15 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="ambient" aria-hidden="true"></div>
     <main class="game-shell">
       <section class="play-area" aria-label="知識森林 RPG 遊戲區">
+        <div class="game-title">
+          <span>Chapter 1</span>
+          <strong>知識森林</strong>
+        </div>
         <canvas id="game" width="960" height="640"></canvas>
+        <div class="toast">靠近發光知識碑，按空白鍵挑戰</div>
         <div id="dialog" class="dialog hidden" role="status" aria-live="polite"></div>
         <div id="quiz" class="quiz hidden" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
           <h2 id="quizTitle">知識挑戰</h2>
@@ -19,7 +25,7 @@
       </section>
 
       <aside class="hud" aria-label="遊戲資訊">
-        <div>
+        <div class="quest-card">
           <p class="label">任務</p>
           <h1>知識森林 RPG</h1>
           <p id="questText">和村口的老師對話，開始今天的探索。</p>
@@ -42,9 +48,9 @@
 
         <div class="controls">
           <p class="label">操作</p>
-          <p>方向鍵 / WASD 移動</p>
-          <p>空白鍵互動</p>
-          <p>答對題目可以獲得知識碎片</p>
+          <p><kbd>方向鍵</kbd><kbd>WASD</kbd> 移動</p>
+          <p><kbd>Space</kbd> 互動與挑戰</p>
+          <p>答對題目會點亮森林能量</p>
         </div>
 
         <button id="restart" type="button">重新開始</button>
