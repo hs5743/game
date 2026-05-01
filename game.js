@@ -25,6 +25,7 @@ const playerNameLabel = document.querySelector("#playerNameLabel");
 const virtueProgress = document.querySelector("#virtueProgress");
 const emotionProgress = document.querySelector("#emotionProgress");
 const lessonText = document.querySelector("#lessonText");
+const collectionSummary = document.querySelector("#collectionSummary");
 
 const TILE = 40;
 const COLS = canvas.width / TILE;
@@ -1064,6 +1065,7 @@ function updateHud() {
   const emotionCount = cards.filter((card) => card.type === "情緒詞彙" && state.collected.has(card.id)).length;
   playerNameLabel.textContent = playerName || "冒險者";
   shardsText.textContent = `${state.collected.size} / ${totalQuizCount}`;
+  collectionSummary.textContent = `${state.collected.size} / ${totalQuizCount}`;
   virtueProgress.textContent = `${virtueCount} / 12`;
   emotionProgress.textContent = `${emotionCount} / 12`;
   heartsText.textContent = state.hearts;

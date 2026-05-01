@@ -84,22 +84,22 @@
           </div>
         </div>
 
-        <div class="collection">
-          <p class="label">字卡圖鑑</p>
+        <details class="panel-toggle collection">
+          <summary>字卡圖鑑 <span id="collectionSummary">0 / 24</span></summary>
           <div id="collectionGrid" class="collection-grid" aria-label="已收集字卡進度"></div>
-        </div>
+        </details>
 
-        <div class="learning-note">
-          <p class="label">學習筆記</p>
+        <details class="panel-toggle learning-note" open>
+          <summary>學習筆記</summary>
           <p id="lessonText">完成字卡挑戰後，這裡會留下可以在生活中練習的小任務。</p>
-        </div>
+        </details>
 
-        <div class="controls">
-          <p class="label">操作</p>
+        <details class="panel-toggle controls">
+          <summary>操作</summary>
           <p><kbd>方向鍵</kbd><kbd>WASD</kbd> 移動</p>
           <p><kbd>Space</kbd> 對話、挑戰字卡</p>
           <p>踩上發光出口可切換地圖。</p>
-        </div>
+        </details>
 
         <button id="restart" type="button">重新開始</button>
       </aside>
