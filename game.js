@@ -112,6 +112,17 @@ let state = freshState();
 let lastTime = 0;
 let dialogTimer = 0;
 let activeQuiz = null;
+let sceneTime = 0;
+let screenFlash = 0;
+let particles = [];
+let floatingTexts = [];
+
+const sparkleSeeds = Array.from({ length: 44 }, (_, index) => ({
+  x: ((index * 137) % canvas.width),
+  y: ((index * 83) % canvas.height),
+  phase: index * 0.7,
+  size: 1 + (index % 3)
+}));
 
 function freshState() {
   return {
@@ -129,6 +140,9 @@ function resetGame() {
   player.py = 2 * TILE + TILE / 2;
   player.facing = { x: 0, y: 1 };
   activeQuiz = null;
+  particles = [];
+  floatingTexts = [];
+  screenFlash = 0;
   hideDialog();
   quizPanel.classList.add("hidden");
   updateHud();
@@ -161,6 +175,9 @@ function canMoveTo(px, py) {
 }
 
 function update(dt) {
+  sceneTime += dt;
+  screenFlash = Math.max(0, screenFlash - dt * 0.04);
+  updateParticles(dt);
   if (state.locked) return;
 
   let vx = 0;
@@ -191,10 +208,22 @@ function update(dt) {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawSkyGlow();
   drawMap();
   drawObjects();
   drawPlayer();
+  drawParticles();
+  drawVignette();
   drawOverlay();
+}
+
+function drawSkyGlow() {
+  const glow = ctx.createRadialGradient(canvas.width * 0.52, canvas.height * 0.44, 90, canvas.width * 0.52, canvas.height * 0.44, 600);
+  glow.addColorStop(0, "#326d49");
+  glow.addColorStop(0.55, "#18351f");
+  glow.addColorStop(1, "#101820");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function drawMap() {
@@ -203,12 +232,20 @@ function drawMap() {
       const cell = map[y][x];
       const px = x * TILE;
       const py = y * TILE;
-      ctx.fillStyle = cell === "#" ? "#35523d" : "#9ccf8d";
+      const grassShift = ((x * 11 + y * 7) % 5) * 3;
+      ctx.fillStyle = cell === "#" ? "#2e4638" : `rgb(${75 + grassShift}, ${142 + grassShift}, ${82 + grassShift})`;
       ctx.fillRect(px, py, TILE, TILE);
+      if (cell !== "#") {
+        ctx.fillStyle = "rgba(255,255,255,0.06)";
+        ctx.fillRect(px + 4, py + 5, 9, 3);
+        ctx.fillRect(px + 25, py + 27, 7, 3);
+      }
 
       if (cell === "#") {
-        ctx.fillStyle = "#263b2d";
-        ctx.fillRect(px, py + 24, TILE, 16);
+        ctx.fillStyle = "#1b2d28";
+        ctx.fillRect(px, py + 23, TILE, 17);
+        ctx.fillStyle = "rgba(255,255,255,0.08)";
+        ctx.fillRect(px + 4, py + 5, 28, 4);
       }
 
       if (cell === "T") drawTree(px, py);
@@ -222,11 +259,19 @@ function drawMap() {
 }
 
 function drawTree(px, py) {
+  ctx.fillStyle = "rgba(4, 20, 12, 0.28)";
+  ctx.beginPath();
+  ctx.ellipse(px + 20, py + 32, 19, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = "#67462d";
   ctx.fillRect(px + 17, py + 21, 7, 16);
-  ctx.fillStyle = "#1f6d3a";
+  ctx.fillStyle = "#145b36";
   ctx.beginPath();
-  ctx.arc(px + 20, py + 18, 15, 0, Math.PI * 2);
+  ctx.arc(px + 20, py + 18 + Math.sin(sceneTime * 0.04 + px) * 1.2, 15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#2fa35d";
+  ctx.beginPath();
+  ctx.arc(px + 14, py + 12, 6, 0, Math.PI * 2);
   ctx.fill();
 }
 
@@ -244,12 +289,20 @@ function drawObjects() {
     const completed = state.shards.has(stone.id);
     const px = stone.x * TILE;
     const py = stone.y * TILE;
+    const pulse = completed ? 0 : Math.sin(sceneTime * 0.08 + stone.x) * 4;
+    if (!completed) {
+      const aura = ctx.createRadialGradient(px + 20, py + 20, 2, px + 20, py + 20, 34 + pulse);
+      aura.addColorStop(0, "rgba(94, 234, 212, 0.55)");
+      aura.addColorStop(1, "rgba(94, 234, 212, 0)");
+      ctx.fillStyle = aura;
+      ctx.fillRect(px - 24, py - 24, 88, 88);
+    }
     ctx.fillStyle = completed ? "#88a0a8" : "#42c6ff";
     ctx.beginPath();
-    ctx.moveTo(px + 20, py + 5);
-    ctx.lineTo(px + 32, py + 20);
-    ctx.lineTo(px + 20, py + 35);
-    ctx.lineTo(px + 8, py + 20);
+    ctx.moveTo(px + 20, py + 3 - pulse * 0.2);
+    ctx.lineTo(px + 33, py + 20);
+    ctx.lineTo(px + 20, py + 37 + pulse * 0.2);
+    ctx.lineTo(px + 7, py + 20);
     ctx.closePath();
     ctx.fill();
     ctx.fillStyle = completed ? "#d6e2e5" : "#ffffff";
@@ -259,16 +312,29 @@ function drawObjects() {
   npcs.forEach((npc) => {
     const px = npc.x * TILE + 20;
     const py = npc.y * TILE + 21;
+    ctx.fillStyle = "rgba(4, 20, 12, 0.3)";
+    ctx.beginPath();
+    ctx.ellipse(px, py + 15, 14, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
     ctx.fillStyle = npc.color;
     ctx.beginPath();
-    ctx.arc(px, py - 8, 10, 0, Math.PI * 2);
+    ctx.arc(px, py - 8 + Math.sin(sceneTime * 0.05 + npc.x) * 1.3, 10, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillRect(px - 9, py, 18, 17);
+    ctx.fillStyle = "#fff2c6";
+    ctx.fillRect(px - 4, py - 11, 3, 3);
+    ctx.fillRect(px + 4, py - 11, 3, 3);
   });
+
+  drawSparkles();
 }
 
 function drawPlayer() {
   const bounce = player.moving ? Math.sin(Date.now() / 80) * 2 : 0;
+  ctx.fillStyle = "rgba(4, 20, 12, 0.34)";
+  ctx.beginPath();
+  ctx.ellipse(player.px, player.py + 19, 17, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = "#2d6cdf";
   ctx.beginPath();
   ctx.arc(player.px, player.py - 9 + bounce, 10, 0, Math.PI * 2);
@@ -277,6 +343,63 @@ function drawPlayer() {
   ctx.fillRect(player.px - 8, player.py + bounce, 16, 16);
   ctx.fillStyle = "#143a6b";
   ctx.fillRect(player.px - 11, player.py + 12 + bounce, 22, 7);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(player.px - 4, player.py - 12 + bounce, 3, 3);
+  ctx.fillRect(player.px + 4, player.py - 12 + bounce, 3, 3);
+  ctx.fillStyle = "#ffdc7b";
+  ctx.fillRect(player.px - 14, player.py + 2 + bounce, 5, 11);
+}
+
+function drawSparkles() {
+  sparkleSeeds.forEach((spark) => {
+    const alpha = 0.12 + Math.max(0, Math.sin(sceneTime * 0.035 + spark.phase)) * 0.42;
+    ctx.fillStyle = `rgba(255, 237, 148, ${alpha})`;
+    ctx.fillRect(spark.x, spark.y, spark.size, spark.size);
+  });
+}
+
+function updateParticles(dt) {
+  particles = particles
+    .map((p) => ({ ...p, x: p.x + p.vx * dt, y: p.y + p.vy * dt, life: p.life - dt }))
+    .filter((p) => p.life > 0);
+  floatingTexts = floatingTexts
+    .map((item) => ({ ...item, y: item.y - 0.55 * dt, life: item.life - dt }))
+    .filter((item) => item.life > 0);
+}
+
+function drawParticles() {
+  particles.forEach((p) => {
+    ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, p.size, p.size);
+  });
+  ctx.globalAlpha = 1;
+
+  floatingTexts.forEach((item) => {
+    ctx.globalAlpha = Math.max(0, item.life / item.maxLife);
+    ctx.font = "800 18px Segoe UI, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = item.color;
+    ctx.strokeStyle = "rgba(0,0,0,0.4)";
+    ctx.lineWidth = 4;
+    ctx.strokeText(item.text, item.x, item.y);
+    ctx.fillText(item.text, item.x, item.y);
+  });
+  ctx.globalAlpha = 1;
+  ctx.textAlign = "start";
+}
+
+function drawVignette() {
+  const vignette = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 180, canvas.width / 2, canvas.height / 2, 570);
+  vignette.addColorStop(0, "rgba(0, 0, 0, 0)");
+  vignette.addColorStop(1, "rgba(0, 0, 0, 0.42)");
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (screenFlash > 0) {
+    ctx.fillStyle = `rgba(255, 244, 169, ${screenFlash})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 }
 
 function drawOverlay() {
@@ -304,6 +427,7 @@ function interact() {
   if (nearNpc) {
     if (nearNpc.id === "teacher") state.started = true;
     showDialog(`${nearNpc.name}：${nearNpc.lines.join(" ")}`);
+    addFloatingText("任務提示", nearNpc.x * TILE + 20, nearNpc.y * TILE, "#ffdc7b");
     updateHud();
     return;
   }
@@ -356,9 +480,14 @@ function answerQuiz(index) {
   if (correct) {
     state.shards.add(activeQuiz.id);
     showDialog(`答對了！你獲得「${activeQuiz.reward}」。`);
+    burst(activeQuiz.x * TILE + 20, activeQuiz.y * TILE + 20, "#ffdc7b", 34);
+    addFloatingText("+1 知識碎片", activeQuiz.x * TILE + 20, activeQuiz.y * TILE - 2, "#ffdc7b");
+    screenFlash = 0.22;
   } else {
     state.hearts = Math.max(0, state.hearts - 1);
     showDialog("還差一點。勇氣少 1，但你可以再挑戰其他知識碑。");
+    burst(player.px, player.py, "#ff6b6b", 18);
+    addFloatingText("再試一次", player.px, player.py - 16, "#ffb4a8");
   }
 
   if (state.shards.size >= quizStones.length) {
@@ -368,6 +497,27 @@ function answerQuiz(index) {
 
   activeQuiz = null;
   updateHud();
+}
+
+function burst(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count;
+    const speed = 0.8 + (i % 7) * 0.18;
+    particles.push({
+      x,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life: 28 + (i % 8),
+      maxLife: 36,
+      size: 3 + (i % 3),
+      color
+    });
+  }
+}
+
+function addFloatingText(text, x, y, color) {
+  floatingTexts.push({ text, x, y, color, life: 70, maxLife: 70 });
 }
 
 function updateHud() {
