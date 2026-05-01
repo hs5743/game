@@ -16,9 +16,9 @@ body {
   place-items: center;
   padding: 24px;
   background:
-    radial-gradient(circle at 20% 10%, rgba(255, 211, 105, 0.2), transparent 28%),
-    radial-gradient(circle at 78% 18%, rgba(66, 198, 255, 0.18), transparent 32%),
-    linear-gradient(145deg, #101821 0%, #14271f 52%, #263219 100%);
+    radial-gradient(circle at 18% 10%, rgba(255, 211, 105, 0.2), transparent 25%),
+    radial-gradient(circle at 82% 18%, rgba(76, 201, 240, 0.18), transparent 28%),
+    linear-gradient(145deg, #101821 0%, #14271f 54%, #263219 100%);
   overflow-x: hidden;
 }
 
@@ -38,9 +38,9 @@ button {
 }
 
 .game-shell {
-  width: min(1240px, 100%);
+  width: min(1280px, 100%);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 18px;
   align-items: stretch;
 }
@@ -91,6 +91,7 @@ canvas {
 .toast {
   top: 18px;
   right: 18px;
+  max-width: min(420px, 48%);
   padding: 9px 12px;
   color: #13301f;
   background: rgba(255, 242, 177, 0.92);
@@ -103,10 +104,10 @@ canvas {
 
 .hud {
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  gap: 18px;
-  padding: 22px;
-  background: rgba(16, 24, 33, 0.82);
+  grid-template-rows: auto auto auto minmax(116px, 1fr) auto auto;
+  gap: 14px;
+  padding: 20px;
+  background: rgba(16, 24, 33, 0.84);
   border: 1px solid rgba(174, 243, 196, 0.18);
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.35);
   border-radius: 8px;
@@ -122,7 +123,7 @@ canvas {
 
 h1 {
   margin: 0 0 12px;
-  font-size: 1.85rem;
+  font-size: 1.7rem;
   line-height: 1.15;
   color: #ffffff;
 }
@@ -134,16 +135,48 @@ h1 {
   color: #d8e9dc;
 }
 
+.active-card {
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.active-card img {
+  width: 82px;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
+}
+
+.active-card strong {
+  display: block;
+  color: #ffe082;
+  margin-bottom: 5px;
+}
+
+.active-card span {
+  display: block;
+  color: #d8e9dc;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
 .stats {
   display: grid;
-  gap: 10px;
+  gap: 9px;
 }
 
 .stats div {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px;
+  padding: 10px 12px;
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04));
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
@@ -155,6 +188,28 @@ h1 {
 
 .stats strong {
   color: #ffe082;
+}
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+}
+
+.collection-grid button {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  color: #142017;
+  background: rgba(255, 255, 255, 0.11);
+  font-size: 0.7rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.collection-grid button.collected {
+  background: linear-gradient(135deg, #ffdc7b, #65e6a6);
 }
 
 #restart {
@@ -182,7 +237,7 @@ h1 {
   bottom: 18px;
   padding: 16px;
   color: #16231b;
-  background: rgba(255, 252, 234, 0.96);
+  background: rgba(255, 252, 234, 0.97);
   border: 1px solid rgba(255, 255, 255, 0.58);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
@@ -196,18 +251,39 @@ h1 {
 .quiz {
   bottom: 50%;
   transform: translateY(50%);
-  max-width: 620px;
+  max-width: 720px;
   margin: 0 auto;
 }
 
+.quiz-card-preview {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.quiz-card-preview img {
+  width: 88px;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
 .quiz h2 {
-  margin: 0 0 10px;
-  font-size: 1.25rem;
+  margin: 0;
+  font-size: 1.28rem;
 }
 
 .quiz p {
   margin: 0 0 14px;
   line-height: 1.5;
+}
+
+#quizCardMeta {
+  margin: 0 0 4px;
+  color: #5a6a4f;
+  font-weight: 800;
 }
 
 .quiz-options {
@@ -263,5 +339,14 @@ kbd {
 
   .hud {
     grid-template-rows: auto;
+  }
+
+  .toast {
+    top: auto;
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+    max-width: none;
+    text-align: center;
   }
 }
