@@ -25,26 +25,26 @@ const worldMaps = {
     theme: "village",
     spawn: { x: 11, y: 10 },
     tiles: [
-      "########################",
-      "#......TT....TT........#",
+      "##########EEEE##########",
+      "#......TT.PPPP.TT......#",
       "#..HH..............HH..#",
       "#..HH....PPPPPP....HH..#",
       "#........P....P........#",
       "#....N...P.Q..P...N....#",
       "#........P....P........#",
       "#..PPPPPPP....PPPPPPP..#",
-      "#..P................P..#",
-      "#..P...HH..K...HH...P..#",
+      "#..P................PE.#",
+      "#..P...HH..K...HH...PE.#",
       "#..P...HH......HH...P..#",
       "#..PPPPPPP....PPPPPPP..#",
       "#........P....P........#",
       "#..HH....P....P....HH..#",
       "#..HH....PPPPPP....HH..#",
-      "##########EEEE##########"
+      "########################"
     ],
     exits: [
-      { x: 10, y: 0, w: 4, h: 1, target: "forest", spawn: { x: 11, y: 14 }, label: "森林小徑" },
-      { x: 23, y: 7, w: 1, h: 3, target: "farm", spawn: { x: 1, y: 8 }, label: "東邊農田" }
+      { x: 10, y: 1, w: 4, h: 1, target: "forest", spawn: { x: 11, y: 13 }, label: "森林小徑" },
+      { x: 22, y: 8, w: 1, h: 2, target: "farm", spawn: { x: 2, y: 8 }, label: "東邊農田" }
     ],
     npcs: [
       {
@@ -113,10 +113,10 @@ const worldMaps = {
       "#...P..TTTT..P.......T.#",
       "#...PPPPPPPPPP....TTTT.#",
       "#..........E...........#",
-      "##########EEEE##########"
+      "########################"
     ],
     exits: [
-      { x: 10, y: 15, w: 4, h: 1, target: "village", spawn: { x: 11, y: 1 }, label: "回到學習村" }
+      { x: 10, y: 14, w: 4, h: 1, target: "village", spawn: { x: 11, y: 2 }, label: "回到學習村" }
     ],
     npcs: [
       {
@@ -166,9 +166,9 @@ const worldMaps = {
       "#......................#",
       "#..N..PPPPPPPPPP..Q....#",
       "#.....P........P.......#",
-      "E.....P..HHHH..P.......#",
-      "E.....P..HHHH..P..Q....#",
-      "E.....P........P.......#",
+      "#E....P..HHHH..P.......#",
+      "#E....P..HHHH..P..Q....#",
+      "#E....P........P.......#",
       "#.....PPPPPPPPPP.......#",
       "#..FFFFFFFFFFFFFFF.....#",
       "#..F..F..F..F..F.F.....#",
@@ -177,7 +177,7 @@ const worldMaps = {
       "########################"
     ],
     exits: [
-      { x: 0, y: 7, w: 1, h: 3, target: "village", spawn: { x: 22, y: 8 }, label: "回到學習村" }
+      { x: 1, y: 7, w: 1, h: 3, target: "village", spawn: { x: 21, y: 8 }, label: "回到學習村" }
     ],
     npcs: [
       {
