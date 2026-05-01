@@ -17,6 +17,17 @@
         <canvas id="game" width="960" height="640"></canvas>
         <div class="toast">收集 24 張雙語字卡，探索村莊、森林與農田</div>
         <div id="dialog" class="dialog hidden" role="status" aria-live="polite"></div>
+        <div id="namePrompt" class="name-prompt" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
+          <div>
+            <p class="label">冒險開始</p>
+            <h2 id="nameTitle">請輸入你的玩家姓名</h2>
+            <p>NPC 會用這個名字稱呼你，陪你完成 24 張雙語字卡任務。</p>
+            <form id="nameForm">
+              <input id="playerNameInput" type="text" maxlength="12" autocomplete="name" placeholder="例如：小宇" />
+              <button type="submit">開始冒險</button>
+            </form>
+          </div>
+        </div>
         <div id="quiz" class="quiz hidden" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
           <div class="quiz-card-preview">
             <img id="quizCardImage" src="assets/cards/card-01.jpg" alt="" />
@@ -52,6 +63,14 @@
             <strong id="shards">0 / 24</strong>
           </div>
           <div>
+            <span>品格卡</span>
+            <strong id="virtueProgress">0 / 12</strong>
+          </div>
+          <div>
+            <span>情緒卡</span>
+            <strong id="emotionProgress">0 / 12</strong>
+          </div>
+          <div>
             <span>勇氣心</span>
             <strong id="hearts">3</strong>
           </div>
@@ -59,11 +78,20 @@
             <span>所在區域</span>
             <strong id="progress">學習村廣場</strong>
           </div>
+          <div>
+            <span>玩家</span>
+            <strong id="playerNameLabel">冒險者</strong>
+          </div>
         </div>
 
         <div class="collection">
           <p class="label">字卡圖鑑</p>
           <div id="collectionGrid" class="collection-grid" aria-label="已收集字卡進度"></div>
+        </div>
+
+        <div class="learning-note">
+          <p class="label">學習筆記</p>
+          <p id="lessonText">完成字卡挑戰後，這裡會留下可以在生活中練習的小任務。</p>
         </div>
 
         <div class="controls">
