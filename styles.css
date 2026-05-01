@@ -1,8 +1,8 @@
 :root {
   color-scheme: light;
   font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif;
-  background: #e7f1eb;
-  color: #22302a;
+  background: #101821;
+  color: #edf8ee;
 }
 
 * {
@@ -16,18 +16,31 @@ body {
   place-items: center;
   padding: 24px;
   background:
-    linear-gradient(120deg, rgba(255, 255, 255, 0.64), rgba(220, 235, 247, 0.72)),
-    #dfeee5;
+    radial-gradient(circle at 20% 10%, rgba(255, 211, 105, 0.2), transparent 28%),
+    radial-gradient(circle at 78% 18%, rgba(66, 198, 255, 0.18), transparent 32%),
+    linear-gradient(145deg, #101821 0%, #14271f 52%, #263219 100%);
+  overflow-x: hidden;
 }
 
 button {
   font: inherit;
 }
 
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 78%, transparent);
+}
+
 .game-shell {
   width: min(1240px, 100%);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) 320px;
   gap: 18px;
   align-items: stretch;
 }
@@ -35,9 +48,11 @@ button {
 .play-area {
   position: relative;
   min-width: 0;
-  background: #17231d;
-  border: 1px solid rgba(21, 47, 34, 0.2);
-  box-shadow: 0 24px 70px rgba(35, 62, 48, 0.18);
+  overflow: hidden;
+  background: #142017;
+  border: 1px solid rgba(174, 243, 196, 0.24);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
 }
 
 canvas {
@@ -47,33 +62,76 @@ canvas {
   image-rendering: pixelated;
 }
 
+.game-title,
+.toast {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.game-title {
+  top: 16px;
+  left: 16px;
+  display: grid;
+  gap: 3px;
+  color: white;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
+}
+
+.game-title span {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #ffdc7b;
+}
+
+.game-title strong {
+  font-size: 1.25rem;
+}
+
+.toast {
+  top: 18px;
+  right: 18px;
+  padding: 9px 12px;
+  color: #13301f;
+  background: rgba(255, 242, 177, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.54);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
 .hud {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   gap: 18px;
   padding: 22px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(41, 71, 56, 0.18);
-  box-shadow: 0 24px 70px rgba(35, 62, 48, 0.12);
+  background: rgba(16, 24, 33, 0.82);
+  border: 1px solid rgba(174, 243, 196, 0.18);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  backdrop-filter: blur(12px);
 }
 
 .label {
   margin: 0 0 7px;
-  color: #5f6f67;
+  color: #a8f0bd;
   font-size: 0.78rem;
   font-weight: 700;
 }
 
 h1 {
   margin: 0 0 12px;
-  font-size: 1.7rem;
+  font-size: 1.85rem;
   line-height: 1.15;
+  color: #ffffff;
 }
 
 #questText,
 .controls p {
   margin: 0 0 10px;
   line-height: 1.55;
+  color: #d8e9dc;
 }
 
 .stats {
@@ -86,29 +144,34 @@ h1 {
   justify-content: space-between;
   gap: 12px;
   padding: 12px;
-  background: #f6faf7;
-  border: 1px solid #dce7df;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
 }
 
 .stats span {
-  color: #596a61;
+  color: #c3d8cb;
 }
 
 .stats strong {
-  color: #173f2a;
+  color: #ffe082;
 }
 
 #restart {
   width: 100%;
   min-height: 46px;
   border: 0;
-  background: #225d3c;
-  color: white;
+  background: linear-gradient(135deg, #ffcf5a, #65e6a6);
+  color: #142017;
   cursor: pointer;
+  border-radius: 8px;
+  font-weight: 900;
+  box-shadow: 0 12px 28px rgba(101, 230, 166, 0.18);
 }
 
 #restart:hover {
-  background: #17482e;
+  filter: brightness(1.06);
+  transform: translateY(-1px);
 }
 
 .dialog,
@@ -118,9 +181,11 @@ h1 {
   right: 18px;
   bottom: 18px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(26, 54, 39, 0.18);
+  color: #16231b;
+  background: rgba(255, 252, 234, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.58);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
 }
 
 .dialog {
@@ -152,17 +217,35 @@ h1 {
 
 .quiz-options button {
   min-height: 44px;
-  border: 1px solid #cbd8d0;
-  background: #f8fbf9;
+  border: 1px solid #bdd7c6;
+  background: linear-gradient(135deg, #ffffff, #edf8ef);
   color: #203128;
   cursor: pointer;
   text-align: left;
   padding: 10px 12px;
+  border-radius: 8px;
+  font-weight: 700;
 }
 
 .quiz-options button:hover {
   border-color: #225d3c;
-  background: #edf7f1;
+  background: #e0f7e8;
+  transform: translateX(3px);
+}
+
+kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 25px;
+  margin-right: 6px;
+  padding: 0 7px;
+  color: #142017;
+  background: #ffdc7b;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.16);
 }
 
 .hidden {
