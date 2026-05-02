@@ -1128,6 +1128,40 @@ window.addEventListener("keyup", (event) => {
   keys.delete(event.key.toLowerCase());
 });
 
+document.querySelectorAll("[data-touch-key]").forEach((button) => {
+  const key = button.dataset.touchKey;
+  const press = (event) => {
+    event.preventDefault();
+    button.setPointerCapture?.(event.pointerId);
+    keys.add(key);
+    button.classList.add("pressed");
+  };
+  const release = (event) => {
+    event.preventDefault();
+    keys.delete(key);
+    button.classList.remove("pressed");
+  };
+  button.addEventListener("pointerdown", press);
+  button.addEventListener("pointerup", release);
+  button.addEventListener("pointercancel", release);
+  button.addEventListener("lostpointercapture", () => {
+    keys.delete(key);
+    button.classList.remove("pressed");
+  });
+});
+
+document.querySelectorAll("[data-touch-action='interact']").forEach((button) => {
+  button.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    button.classList.add("pressed");
+    interact();
+  });
+  const release = () => button.classList.remove("pressed");
+  button.addEventListener("pointerup", release);
+  button.addEventListener("pointercancel", release);
+  button.addEventListener("lostpointercapture", release);
+});
+
 restartButton.addEventListener("click", resetGame);
 
 nameForm.addEventListener("submit", (event) => {

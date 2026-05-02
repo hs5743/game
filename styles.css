@@ -70,6 +70,8 @@ canvas {
   height: 100%;
   display: block;
   image-rendering: pixelated;
+  touch-action: none;
+  user-select: none;
 }
 
 .game-title,
@@ -77,6 +79,86 @@ canvas {
   position: absolute;
   z-index: 2;
   pointer-events: none;
+}
+
+.touch-controls {
+  position: absolute;
+  inset: auto 16px 16px 16px;
+  z-index: 3;
+  display: none;
+  pointer-events: none;
+}
+
+.touch-pad {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 156px;
+  height: 156px;
+  display: grid;
+  grid-template-columns: repeat(3, 52px);
+  grid-template-rows: repeat(3, 52px);
+  gap: 0;
+  pointer-events: auto;
+}
+
+.touch-btn,
+.touch-action {
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  color: #142017;
+  background: rgba(255, 220, 123, 0.9);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24), inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+  font-weight: 1000;
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  font-size: 1.05rem;
+}
+
+.touch-btn:active,
+.touch-btn.pressed,
+.touch-action:active,
+.touch-action.pressed {
+  transform: translateY(2px);
+  filter: brightness(1.07);
+}
+
+.touch-btn.up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.touch-btn.left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.touch-btn.right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.touch-btn.down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.touch-action {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  min-width: 104px;
+  height: 72px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  pointer-events: auto;
 }
 
 .game-title {
@@ -571,5 +653,102 @@ kbd {
 
   .name-prompt form {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (pointer: coarse), (max-width: 1180px) {
+  body {
+    overflow: auto;
+    padding: 10px;
+  }
+
+  .game-shell {
+    width: min(100%, 1180px);
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
+  }
+
+  .play-area {
+    aspect-ratio: 3 / 2;
+  }
+
+  canvas {
+    height: auto;
+    aspect-ratio: 3 / 2;
+  }
+
+  .touch-controls {
+    display: block;
+  }
+
+  .dialog {
+    left: 13%;
+    right: 13%;
+    bottom: 14px;
+    min-height: 70px;
+    max-height: 30%;
+  }
+
+  .hud {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .stats div,
+  .panel-toggle summary,
+  #restart {
+    min-height: 48px;
+  }
+
+  .quiz-options button,
+  .name-prompt input,
+  .name-prompt button {
+    min-height: 48px;
+  }
+}
+
+@media (pointer: coarse) and (orientation: portrait), (max-width: 820px) {
+  .game-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .hud {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .active-card {
+    grid-template-columns: 64px 1fr;
+    min-height: 98px;
+  }
+
+  .active-card img {
+    width: 64px;
+  }
+}
+
+@media (max-width: 640px) {
+  .touch-pad {
+    width: 132px;
+    height: 132px;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
+  }
+
+  .touch-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .touch-action {
+    min-width: 88px;
+    height: 60px;
+  }
+
+  .dialog {
+    left: 12px;
+    right: 12px;
   }
 }

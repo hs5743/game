@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>雙語字卡學習村 RPG</title>
-    <link rel="stylesheet" href="styles.css?v=7" />
+    <link rel="stylesheet" href="styles.css?v=8" />
   </head>
   <body>
     <div class="ambient" aria-hidden="true"></div>
@@ -17,6 +17,15 @@
         <canvas id="game" width="960" height="640"></canvas>
         <div class="toast">收集 24 張雙語字卡，探索村莊、森林與農田</div>
         <div id="dialog" class="dialog hidden" role="status" aria-live="polite"></div>
+        <div class="touch-controls" aria-label="觸控操作">
+          <div class="touch-pad" aria-label="方向鍵">
+            <button type="button" class="touch-btn up" data-touch-key="arrowup" aria-label="向上">▲</button>
+            <button type="button" class="touch-btn left" data-touch-key="arrowleft" aria-label="向左">◀</button>
+            <button type="button" class="touch-btn right" data-touch-key="arrowright" aria-label="向右">▶</button>
+            <button type="button" class="touch-btn down" data-touch-key="arrowdown" aria-label="向下">▼</button>
+          </div>
+          <button type="button" class="touch-action" data-touch-action="interact" aria-label="對話或挑戰">互動</button>
+        </div>
         <div id="namePrompt" class="name-prompt" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
           <div>
             <p class="label">冒險開始</p>
@@ -42,7 +51,7 @@
       </section>
 
       <aside class="hud" aria-label="遊戲資訊">
-        <div class="build-badge">UI v7</div>
+        <div class="build-badge">iPad UI v8</div>
         <div class="quest-card">
           <p class="label">任務</p>
           <h1>雙語字卡學習村</h1>
@@ -106,7 +115,7 @@
       </aside>
     </main>
 
-    <script src="card-art.js?v=7"></script>
-    <script src="game.js?v=7"></script>
+    <script src="card-art.js?v=8"></script>
+    <script src="game.js?v=8"></script>
   </body>
 </html>
