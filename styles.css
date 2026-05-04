@@ -50,16 +50,18 @@ button {
 .game-shell {
   position: relative;
   width: min(100%, 1680px);
-  height: min(100vh - 20px, calc((100vw - 392px) * 0.6667));
+  height: calc(100vh - 20px);
   min-height: 560px;
   max-height: 872px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+  grid-template-columns: 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 12px;
 }
 
 .play-area {
   position: relative;
+  grid-row: 2;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -126,12 +128,14 @@ canvas {
 
 .hud {
   position: relative;
+  grid-row: 1;
   z-index: 2;
   width: 100%;
   min-height: 0;
   display: grid;
+  grid-template-columns: auto minmax(210px, 320px) minmax(360px, 1fr) auto auto;
   align-self: stretch;
-  align-content: start;
+  align-items: center;
   gap: 9px;
   padding: 12px;
   background: rgba(16, 24, 33, 0.88);
@@ -143,7 +147,8 @@ canvas {
 }
 
 .build-badge {
-  justify-self: end;
+  justify-self: start;
+  white-space: nowrap;
   padding: 3px 8px;
   color: #142017;
   background: rgba(255, 220, 123, 0.9);
@@ -200,12 +205,12 @@ canvas {
 
 .quick-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, minmax(58px, 1fr));
   gap: 7px;
 }
 
 .quick-stats button {
-  min-height: 54px;
+  min-height: 58px;
   display: grid;
   align-content: center;
   gap: 2px;
@@ -231,7 +236,7 @@ canvas {
 
 .hud-actions {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 64px);
   gap: 7px;
 }
 
@@ -249,7 +254,7 @@ canvas {
 }
 
 #restart {
-  width: 100%;
+  width: 112px;
 }
 
 .hud-actions button:hover,
@@ -620,9 +625,8 @@ kbd {
 @media (pointer: coarse), (max-width: 1180px) {
   .game-shell {
     width: min(100%, 1180px);
-    height: min(100vh - 20px, calc((100vw - 360px) * 0.6667));
+    height: calc(100vh - 20px);
     min-height: 540px;
-    grid-template-columns: minmax(0, 1fr) minmax(290px, 330px);
   }
 
   .touch-controls {
@@ -631,6 +635,7 @@ kbd {
 
   .hud {
     width: 100%;
+    grid-template-columns: auto minmax(180px, 280px) minmax(300px, 1fr) auto auto;
   }
 
   .quick-stats button,
@@ -659,15 +664,19 @@ kbd {
   .game-shell {
     height: calc(100vh - 16px);
     min-height: 620px;
-    grid-template-columns: 1fr;
     grid-template-rows: minmax(0, 1fr) auto;
   }
 
   .hud {
+    grid-row: 2;
     width: auto;
     grid-template-columns: 1fr auto;
-    max-height: 42vh;
+    max-height: 36vh;
     overflow: hidden;
+  }
+
+  .play-area {
+    grid-row: 1;
   }
 
   .active-card {
