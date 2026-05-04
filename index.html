@@ -2,21 +2,24 @@
 <html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>雙語字卡學習村 RPG</title>
-    <link rel="stylesheet" href="styles.css?v=8" />
+    <link rel="stylesheet" href="styles.css?v=9" />
   </head>
   <body>
     <div class="ambient" aria-hidden="true"></div>
     <main class="game-shell">
       <section class="play-area" aria-label="雙語字卡學習村 RPG">
+        <canvas id="game" width="960" height="640"></canvas>
+
         <div class="game-title">
           <span>Chapter 1</span>
           <strong>學習村廣場</strong>
         </div>
-        <canvas id="game" width="960" height="640"></canvas>
+
         <div class="toast">收集 24 張雙語字卡，探索村莊、森林與農田</div>
         <div id="dialog" class="dialog hidden" role="status" aria-live="polite"></div>
+
         <div class="touch-controls" aria-label="觸控操作">
           <div class="touch-pad" aria-label="方向鍵">
             <button type="button" class="touch-btn up" data-touch-key="arrowup" aria-label="向上">▲</button>
@@ -26,17 +29,73 @@
           </div>
           <button type="button" class="touch-action" data-touch-action="interact" aria-label="對話或挑戰">互動</button>
         </div>
-        <div id="namePrompt" class="name-prompt" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
-          <div>
-            <p class="label">冒險開始</p>
-            <h2 id="nameTitle">請輸入你的玩家姓名</h2>
-            <p>NPC 會用這個名字稱呼你，陪你完成 24 張雙語字卡任務。</p>
+
+        <aside class="hud" aria-label="遊戲資訊">
+          <div class="build-badge">Game UI v9</div>
+
+          <div class="active-card">
+            <img id="cardImage" src="assets/cards/card-01.jpg" alt="字卡預覽" />
+            <div>
+              <p class="label">目前主題</p>
+              <strong id="cardName">Honesty 誠實</strong>
+              <span id="cardHint">靠近發光字卡，按 Space 開始挑戰。</span>
+            </div>
+          </div>
+
+          <div class="quick-stats" aria-label="重要資訊">
+            <button type="button" data-panel="quest" title="任務">
+              <span>任務</span>
+              <strong id="questMini">主線</strong>
+            </button>
+            <button type="button" data-panel="collection" title="字卡圖鑑">
+              <span>字卡</span>
+              <strong id="shards">0/24</strong>
+            </button>
+            <button type="button" data-panel="collection" title="品格與情緒進度">
+              <span>品格</span>
+              <strong id="virtueProgress">0/12</strong>
+            </button>
+            <button type="button" data-panel="collection" title="品格與情緒進度">
+              <span>情緒</span>
+              <strong id="emotionProgress">0/12</strong>
+            </button>
+            <button type="button" data-panel="quest" title="勇氣心">
+              <span>勇氣</span>
+              <strong id="hearts">3</strong>
+            </button>
+            <button type="button" data-panel="quest" title="所在區域">
+              <span>地區</span>
+              <strong id="progress">學習村</strong>
+            </button>
+          </div>
+
+          <div class="hud-actions">
+            <button type="button" data-panel="quest">任務</button>
+            <button type="button" data-panel="collection">圖鑑</button>
+            <button type="button" data-panel="lesson">筆記</button>
+            <button type="button" data-panel="controls">操作</button>
+          </div>
+
+          <button id="restart" type="button">重新開始</button>
+        </aside>
+
+        <div id="namePrompt" class="start-screen" role="dialog" aria-modal="true" aria-labelledby="nameTitle">
+          <div class="start-card">
+            <p class="label">雙語字卡 RPG</p>
+            <h1 id="nameTitle">雙語字卡學習村</h1>
+            <p>收集 12 張品格字卡與 12 張情緒字卡，在村莊、森林與農田中完成情境挑戰。</p>
+            <div class="start-rules">
+              <span>方向鍵 / WASD 移動</span>
+              <span>Space / 互動鍵 對話與挑戰</span>
+              <span>踩上發光出口切換地圖</span>
+            </div>
             <form id="nameForm">
-              <input id="playerNameInput" type="text" maxlength="12" autocomplete="name" placeholder="例如：小宇" />
-              <button type="submit">開始冒險</button>
+              <input id="playerNameInput" type="text" maxlength="12" autocomplete="name" placeholder="輸入玩家姓名，例如：小宇" />
+              <button type="submit">開始遊戲</button>
             </form>
           </div>
         </div>
+
         <div id="quiz" class="quiz hidden" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
           <div class="quiz-card-preview">
             <img id="quizCardImage" src="assets/cards/card-01.jpg" alt="" />
@@ -48,74 +107,43 @@
           <p id="quizQuestion"></p>
           <div id="quizOptions" class="quiz-options"></div>
         </div>
+
+        <div id="infoModal" class="info-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+          <div class="modal-card">
+            <button id="modalClose" class="modal-close" type="button" aria-label="關閉">×</button>
+            <h2 id="modalTitle">任務</h2>
+
+            <section id="panelQuest" class="modal-panel">
+              <p id="questText">找村長開始旅程，探索每張發光字卡，完成品格與情緒詞彙挑戰。</p>
+              <div class="modal-stats">
+                <div><span>玩家</span><strong id="playerNameLabel">冒險者</strong></div>
+                <div><span>所在區域</span><strong id="modalProgress">學習村廣場</strong></div>
+                <div><span>收集</span><strong id="collectionSummary">0 / 24</strong></div>
+              </div>
+            </section>
+
+            <section id="panelCollection" class="modal-panel hidden">
+              <div id="collectionGrid" class="collection-grid" aria-label="已收集字卡進度"></div>
+            </section>
+
+            <section id="panelLesson" class="modal-panel hidden">
+              <p id="lessonText">完成字卡挑戰後，這裡會留下可以在生活中練習的小任務。</p>
+            </section>
+
+            <section id="panelControls" class="modal-panel hidden">
+              <div class="control-list">
+                <span><kbd>方向鍵</kbd><kbd>WASD</kbd> 移動</span>
+                <span><kbd>Space</kbd> 對話、挑戰字卡</span>
+                <span><kbd>互動</kbd> 平板觸控操作</span>
+                <span>踩上發光出口可切換地圖。</span>
+              </div>
+            </section>
+          </div>
+        </div>
       </section>
-
-      <aside class="hud" aria-label="遊戲資訊">
-        <div class="build-badge">iPad UI v8</div>
-        <div class="quest-card">
-          <p class="label">任務</p>
-          <h1>雙語字卡學習村</h1>
-          <p id="questText">找村長開始旅程，探索每張發光字卡，完成品格與情緒詞彙挑戰。</p>
-        </div>
-
-        <div class="active-card">
-          <img id="cardImage" src="assets/cards/card-01.jpg" alt="字卡預覽" />
-          <div>
-            <p class="label">目前主題</p>
-            <strong id="cardName">Honesty 誠實</strong>
-            <span id="cardHint">靠近發光字卡，按 Space 開始挑戰。</span>
-          </div>
-        </div>
-
-        <div class="stats">
-          <div>
-            <span>已收集字卡</span>
-            <strong id="shards">0 / 24</strong>
-          </div>
-          <div>
-            <span>品格卡</span>
-            <strong id="virtueProgress">0 / 12</strong>
-          </div>
-          <div>
-            <span>情緒卡</span>
-            <strong id="emotionProgress">0 / 12</strong>
-          </div>
-          <div>
-            <span>勇氣心</span>
-            <strong id="hearts">3</strong>
-          </div>
-          <div>
-            <span>所在區域</span>
-            <strong id="progress">學習村廣場</strong>
-          </div>
-          <div>
-            <span>玩家</span>
-            <strong id="playerNameLabel">冒險者</strong>
-          </div>
-        </div>
-
-        <details class="panel-toggle collection">
-          <summary>字卡圖鑑 <span id="collectionSummary">0 / 24</span></summary>
-          <div id="collectionGrid" class="collection-grid" aria-label="已收集字卡進度"></div>
-        </details>
-
-        <details class="panel-toggle learning-note" open>
-          <summary>學習筆記</summary>
-          <p id="lessonText">完成字卡挑戰後，這裡會留下可以在生活中練習的小任務。</p>
-        </details>
-
-        <details class="panel-toggle controls">
-          <summary>操作</summary>
-          <p><kbd>方向鍵</kbd><kbd>WASD</kbd> 移動</p>
-          <p><kbd>Space</kbd> 對話、挑戰字卡</p>
-          <p>踩上發光出口可切換地圖。</p>
-        </details>
-
-        <button id="restart" type="button">重新開始</button>
-      </aside>
     </main>
 
-    <script src="card-art.js?v=8"></script>
-    <script src="game.js?v=8"></script>
+    <script src="card-art.js?v=9"></script>
+    <script src="game.js?v=9"></script>
   </body>
 </html>

@@ -26,6 +26,17 @@ const virtueProgress = document.querySelector("#virtueProgress");
 const emotionProgress = document.querySelector("#emotionProgress");
 const lessonText = document.querySelector("#lessonText");
 const collectionSummary = document.querySelector("#collectionSummary");
+const questMini = document.querySelector("#questMini");
+const modalProgress = document.querySelector("#modalProgress");
+const infoModal = document.querySelector("#infoModal");
+const modalTitle = document.querySelector("#modalTitle");
+const modalClose = document.querySelector("#modalClose");
+const modalPanels = {
+  quest: document.querySelector("#panelQuest"),
+  collection: document.querySelector("#panelCollection"),
+  lesson: document.querySelector("#panelLesson"),
+  controls: document.querySelector("#panelControls")
+};
 
 const TILE = 40;
 const COLS = canvas.width / TILE;
@@ -494,16 +505,21 @@ function currentMap() {
 }
 
 function resetGame() {
+  playerName = "";
+  localStorage.removeItem("eduRpgPlayerName");
+  playerNameInput.value = "";
   state = freshState();
-  state.locked = !playerName;
   changeMap("villageCenter", worldMaps.villageCenter.spawn, false);
   activeQuiz = null;
   particles = [];
   floatingTexts = [];
   screenFlash = 0;
+  lastPreviewId = 1;
   hideDialog();
+  closeInfoModal();
   quizPanel.classList.add("hidden");
-  namePrompt.classList.toggle("hidden", Boolean(playerName));
+  namePrompt.classList.remove("hidden");
+  playerNameInput.focus();
   updateHud();
 }
 
@@ -1073,6 +1089,8 @@ function updateHud() {
   placeTitle.textContent = map.title;
   toast.textContent = map.hint;
   progressText.textContent = map.title;
+  modalProgress.textContent = map.title;
+  questMini.textContent = state.started ? "進行中" : "開始";
   updateCardPreview(lastPreviewId, state.collected.has(lastPreviewId) ? "已收集。點圖鑑可查看其他字卡。" : undefined);
   lessonText.textContent = state.lastLesson || "完成字卡挑戰後，這裡會留下可以在生活中練習的小任務。";
 
@@ -1117,10 +1135,30 @@ function loop(time) {
   requestAnimationFrame(loop);
 }
 
+const panelTitles = {
+  quest: "任務資訊",
+  collection: "字卡圖鑑",
+  lesson: "學習筆記",
+  controls: "操作說明"
+};
+
+function openInfoModal(panel = "quest") {
+  Object.entries(modalPanels).forEach(([key, element]) => {
+    element.classList.toggle("hidden", key !== panel);
+  });
+  modalTitle.textContent = panelTitles[panel] ?? "資訊";
+  infoModal.classList.remove("hidden");
+}
+
+function closeInfoModal() {
+  infoModal.classList.add("hidden");
+}
+
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
   if (["arrowup", "arrowdown", "arrowleft", "arrowright", " ", "w", "a", "s", "d"].includes(key)) event.preventDefault();
   if (key === " ") interact();
+  if (key === "escape") closeInfoModal();
   keys.add(key);
 });
 
@@ -1160,6 +1198,15 @@ document.querySelectorAll("[data-touch-action='interact']").forEach((button) => 
   button.addEventListener("pointerup", release);
   button.addEventListener("pointercancel", release);
   button.addEventListener("lostpointercapture", release);
+});
+
+document.querySelectorAll("[data-panel]").forEach((button) => {
+  button.addEventListener("click", () => openInfoModal(button.dataset.panel));
+});
+
+modalClose.addEventListener("click", closeInfoModal);
+infoModal.addEventListener("click", (event) => {
+  if (event.target === infoModal) closeInfoModal();
 });
 
 restartButton.addEventListener("click", resetGame);
