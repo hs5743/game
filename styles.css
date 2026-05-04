@@ -50,9 +50,12 @@ button {
 .game-shell {
   position: relative;
   width: min(100%, 1680px);
-  height: min(100vh - 20px, calc((100vw - 20px) * 0.6667));
+  height: min(100vh - 20px, calc((100vw - 392px) * 0.6667));
   min-height: 560px;
-  max-height: 940px;
+  max-height: 872px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+  gap: 12px;
 }
 
 .play-area {
@@ -77,7 +80,6 @@ canvas {
 
 .game-title,
 .toast,
-.hud,
 .touch-controls {
   position: absolute;
   z-index: 2;
@@ -123,10 +125,13 @@ canvas {
 }
 
 .hud {
-  top: 14px;
-  right: 14px;
-  width: min(330px, 30vw);
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: 0;
   display: grid;
+  align-self: stretch;
+  align-content: start;
   gap: 9px;
   padding: 12px;
   background: rgba(16, 24, 33, 0.88);
@@ -134,6 +139,7 @@ canvas {
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
   border-radius: 8px;
   backdrop-filter: blur(12px);
+  overflow: hidden;
 }
 
 .build-badge {
@@ -614,8 +620,9 @@ kbd {
 @media (pointer: coarse), (max-width: 1180px) {
   .game-shell {
     width: min(100%, 1180px);
-    height: min(100vh - 20px, calc((100vw - 20px) * 0.6667));
+    height: min(100vh - 20px, calc((100vw - 360px) * 0.6667));
     min-height: 540px;
+    grid-template-columns: minmax(0, 1fr) minmax(290px, 330px);
   }
 
   .touch-controls {
@@ -623,7 +630,7 @@ kbd {
   }
 
   .hud {
-    width: min(310px, 36vw);
+    width: 100%;
   }
 
   .quick-stats button,
@@ -650,16 +657,17 @@ kbd {
   }
 
   .game-shell {
-    height: min(100vh - 16px, calc((100vw - 16px) * 1.45));
+    height: calc(100vh - 16px);
     min-height: 620px;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
   }
 
   .hud {
-    top: 10px;
-    right: 10px;
-    left: 10px;
     width: auto;
     grid-template-columns: 1fr auto;
+    max-height: 42vh;
+    overflow: hidden;
   }
 
   .active-card {
@@ -702,7 +710,7 @@ kbd {
   }
 
   .game-title {
-    top: 188px;
+    top: 12px;
   }
 
   .dialog {
