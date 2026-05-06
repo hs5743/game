@@ -24,9 +24,10 @@ const playerNameInput = document.querySelector("#playerNameInput");
 const playerNameLabel = document.querySelector("#playerNameLabel");
 const virtueProgress = document.querySelector("#virtueProgress");
 const emotionProgress = document.querySelector("#emotionProgress");
-const lessonText = document.querySelector("#lessonText");
 const collectionSummary = document.querySelector("#collectionSummary");
 const questMini = document.querySelector("#questMini");
+const questList = document.querySelector("#questList");
+const cardDetail = document.querySelector("#cardDetail");
 const modalProgress = document.querySelector("#modalProgress");
 const infoModal = document.querySelector("#infoModal");
 const modalTitle = document.querySelector("#modalTitle");
@@ -34,7 +35,6 @@ const modalClose = document.querySelector("#modalClose");
 const modalPanels = {
   quest: document.querySelector("#panelQuest"),
   collection: document.querySelector("#panelCollection"),
-  lesson: document.querySelector("#panelLesson"),
   controls: document.querySelector("#panelControls")
 };
 
@@ -221,6 +221,44 @@ function makeQuestion(card) {
 }
 
 const quizBank = cards.map((card) => makeQuestion(card));
+
+const sideQuestDefs = {
+  mayorRecords: {
+    title: "村長的字卡紀錄",
+    giver: "mayor",
+    target: "librarian",
+    returnTo: "mayor",
+    reward: 1,
+    accepted: "{player}，請你到字卡館找館員確認字卡紀錄。回來告訴我後，我會送你一顆勇氣心。",
+    targetMet: "我已經替你確認字卡紀錄了。請回廣場找村長，他會知道你的努力。",
+    ready: "{player}，你完成了字卡紀錄確認。這顆勇氣心送給你，繼續探索吧！",
+    done: "你的字卡紀錄很清楚。接下來把圖鑑慢慢補滿，村莊會越來越亮。"
+  },
+  rangerCalm: {
+    title: "森林的放鬆練習",
+    giver: "ranger",
+    target: "pondGuide",
+    returnTo: "ranger",
+    reward: 1,
+    accepted: "{player}，森林有時會讓人緊張。請到心情池畔找池畔夥伴，學一個放鬆方法再回來。",
+    targetMet: "我們一起慢慢吸氣、吐氣。你已經完成放鬆練習，回去告訴森林守望者吧。",
+    ready: "你把放鬆方法帶回森林了。這顆勇氣心提醒你，緊張時也能照顧自己。",
+    done: "森林聽見你的呼吸變穩了。遇到情緒時，先停一下，再選擇下一步。"
+  },
+  farmerSeeds: {
+    title: "合作種子的提示",
+    giver: "farmer",
+    target: "ranger",
+    returnTo: "farmer",
+    reward: 1,
+    accepted: "{player}，農田需要合作種子。請到晨光森林找森林守望者，問問合作要怎麼開始。",
+    targetMet: "合作種子的提示是：先聽見別人的需要，再說出自己能幫忙的地方。把這句話帶回農田吧。",
+    ready: "你把合作種子的提示帶回來了。這顆勇氣心送給願意一起做事的你。",
+    done: "合作種子已經種下了。之後這裡可以長出更多任務、道具和學習故事。"
+  }
+};
+
+const questIds = Object.keys(sideQuestDefs);
 
 function createTiles(builder) {
   const grid = Array.from({ length: ROWS }, (_, y) =>
@@ -481,6 +519,7 @@ let screenFlash = 0;
 let particles = [];
 let floatingTexts = [];
 let lastPreviewId = 1;
+let selectedCollectionCardId = null;
 const totalQuizCount = cards.length;
 const sparkleSeeds = Array.from({ length: 76 }, (_, index) => ({
   x: (index * 137) % canvas.width,
@@ -496,7 +535,8 @@ function freshState() {
     started: false,
     finished: false,
     locked: !playerName,
-    lastLesson: ""
+    lastLesson: "",
+    sideQuests: Object.fromEntries(questIds.map((id) => [id, "notStarted"]))
   };
 }
 
@@ -515,6 +555,7 @@ function resetGame() {
   floatingTexts = [];
   screenFlash = 0;
   lastPreviewId = 1;
+  selectedCollectionCardId = null;
   hideDialog();
   closeInfoModal();
   quizPanel.classList.add("hidden");
@@ -917,6 +958,72 @@ function drawOverlay() {
   ctx.textAlign = "start";
 }
 
+function questStatus(id) {
+  return state.sideQuests?.[id] ?? "notStarted";
+}
+
+function setQuestStatus(id, status) {
+  if (!state.sideQuests) state.sideQuests = Object.fromEntries(questIds.map((questId) => [questId, "notStarted"]));
+  state.sideQuests[id] = status;
+}
+
+function questStatusLabel(status) {
+  return {
+    notStarted: "尚未接取",
+    accepted: "進行中",
+    targetMet: "可回報",
+    completed: "已完成"
+  }[status] ?? "尚未接取";
+}
+
+function completeQuest(id, npc) {
+  const quest = sideQuestDefs[id];
+  setQuestStatus(id, "completed");
+  state.hearts += quest.reward;
+  showDialog(quest.ready, npc.name);
+  addFloatingText(`+${quest.reward} 勇氣心`, npc.x * TILE + 20, npc.y * TILE, "#ffdc7b");
+  burst(npc.x * TILE + 20, npc.y * TILE + 12, "#ffdc7b", 24);
+  screenFlash = 0.18;
+}
+
+function handleNpcQuest(npc) {
+  const returnQuestId = questIds.find((id) => {
+    const quest = sideQuestDefs[id];
+    return quest.returnTo === npc.id && questStatus(id) === "targetMet";
+  });
+  if (returnQuestId) {
+    completeQuest(returnQuestId, npc);
+    return true;
+  }
+
+  const targetQuestId = questIds.find((id) => {
+    const quest = sideQuestDefs[id];
+    return quest.target === npc.id && questStatus(id) === "accepted";
+  });
+  if (targetQuestId) {
+    setQuestStatus(targetQuestId, "targetMet");
+    showDialog(sideQuestDefs[targetQuestId].targetMet, npc.name);
+    addFloatingText("任務更新", npc.x * TILE + 20, npc.y * TILE, "#8de0c1");
+    return true;
+  }
+
+  const startQuestId = questIds.find((id) => sideQuestDefs[id].giver === npc.id && questStatus(id) === "notStarted");
+  if (startQuestId) {
+    setQuestStatus(startQuestId, "accepted");
+    showDialog(sideQuestDefs[startQuestId].accepted, npc.name);
+    addFloatingText("接到任務", npc.x * TILE + 20, npc.y * TILE, "#ffdc7b");
+    return true;
+  }
+
+  const doneQuestId = questIds.find((id) => sideQuestDefs[id].giver === npc.id && questStatus(id) === "completed");
+  if (doneQuestId) {
+    showDialog(sideQuestDefs[doneQuestId].done, npc.name);
+    return true;
+  }
+
+  return false;
+}
+
 function interact() {
   if (state.locked) return;
   const target = { x: player.x + player.facing.x, y: player.y + player.facing.y };
@@ -934,7 +1041,7 @@ function interact() {
   const nearNpc = currentMap().npcs.find((npc) => distanceTiles(player, npc) <= 1.4 || (npc.x === target.x && npc.y === target.y));
   if (nearNpc) {
     state.started = true;
-    showDialog(nearNpc.lines.map(formatLine).join(" "), nearNpc.name);
+    if (!handleNpcQuest(nearNpc)) showDialog(nearNpc.lines.map(formatLine).join(" "), nearNpc.name);
     addFloatingText("對話", nearNpc.x * TILE + 20, nearNpc.y * TILE, "#ffdc7b");
     updateHud();
     return;
@@ -1061,18 +1168,127 @@ function updateCardPreview(cardId, hint) {
 }
 
 function buildCollectionGrid() {
-  collectionGrid.innerHTML = "";
+  renderCollectionGrid();
+  renderCardDetail();
+}
+
+function renderCollectionGrid() {
+  if (!collectionGrid) return;
+  const fragment = document.createDocumentFragment();
   cards.forEach((card) => {
+    const collected = state.collected.has(card.id);
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = card.id;
+    button.className = `collection-card ${collected ? "collected" : "locked"}`;
     button.title = `${card.zh} ${card.en}`;
+    button.setAttribute("aria-label", collected ? `${card.zh} ${card.en}` : `第 ${card.id} 張尚未收集`);
+    if (collected) {
+      button.innerHTML = `
+        <img src="${cardSrc(card.id)}" alt="" />
+        <strong>${escapeHtml(card.zh)}</strong>
+        <span>${escapeHtml(card.en)}</span>
+      `;
+    } else {
+      button.innerHTML = `<strong>${card.id}</strong><span>尚未收集</span>`;
+    }
     button.addEventListener("click", () => {
-      lastPreviewId = card.id;
-      updateCardPreview(card.id, `${card.role}：${card.clue}`);
+      selectedCollectionCardId = card.id;
+      if (collected) {
+        lastPreviewId = card.id;
+        updateCardPreview(card.id, `${card.role}：${card.clue}`);
+      }
+      renderCardDetail(card.id);
     });
-    collectionGrid.appendChild(button);
+    fragment.appendChild(button);
   });
+  collectionGrid.replaceChildren(fragment);
+}
+
+function renderCardDetail(cardId = selectedCollectionCardId) {
+  if (!cardDetail) return;
+  const firstCollected = cards.find((card) => state.collected.has(card.id))?.id ?? null;
+  const targetId = cardId ?? firstCollected;
+
+  if (!targetId) {
+    cardDetail.innerHTML = `<p class="empty-detail">尚未收集字卡。靠近地圖上的發光字卡並完成挑戰後，這裡會累積所有圖鑑筆記。</p>`;
+    return;
+  }
+
+  const card = cardById.get(targetId);
+  if (!state.collected.has(targetId)) {
+    cardDetail.innerHTML = `
+      <div class="detail-card">
+        <div class="detail-hero">
+          <div class="collection-card locked"><strong>${card.id}</strong><span>尚未收集</span></div>
+          <div>
+            <h3>尚未收集</h3>
+            <p>完成第 ${card.id} 張發光字卡挑戰後，才會解鎖圖片、情境題與生活任務。</p>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  selectedCollectionCardId = targetId;
+  const quiz = quizBank[targetId - 1];
+  const correctAnswer = quiz.options[quiz.answer];
+  cardDetail.innerHTML = `
+    <div class="detail-card">
+      <div class="detail-hero">
+        <img src="${cardSrc(card.id)}" alt="${escapeHtml(card.zh)} ${escapeHtml(card.en)}" />
+        <div>
+          <p class="label">${escapeHtml(card.type)}</p>
+          <h3>${escapeHtml(card.zh)} ${escapeHtml(card.en)}</h3>
+          <p>${escapeHtml(card.role)}：${escapeHtml(card.clue)}</p>
+        </div>
+      </div>
+      <div class="detail-list">
+        <div><span>情境題</span><strong>${escapeHtml(quiz.question)}</strong></div>
+        <div><span>正確答案</span><strong>${escapeHtml(correctAnswer)}</strong></div>
+        <div><span>卡片提示</span><strong>${escapeHtml(card.clue)}</strong></div>
+        <div><span>生活任務</span><strong>${escapeHtml(quiz.practice)}</strong></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderQuestList() {
+  if (!questList) return;
+  questList.innerHTML = questIds.map((id) => {
+    const quest = sideQuestDefs[id];
+    const status = questStatus(id);
+    const className = status === "completed" ? "done" : status === "targetMet" ? "ready" : status === "accepted" ? "active" : "";
+    const currentStep = {
+      notStarted: "找任務 NPC 對話即可接取。",
+      accepted: `前往 ${npcNameById(quest.target)} 完成委託。`,
+      targetMet: `回去找 ${npcNameById(quest.returnTo)} 回報。`,
+      completed: `已獲得 +${quest.reward} 勇氣心。`
+    }[status];
+    return `
+      <div class="quest-item ${className}">
+        <strong>${escapeHtml(quest.title)}</strong>
+        <span>${escapeHtml(questStatusLabel(status))} · ${escapeHtml(currentStep)}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function npcNameById(npcId) {
+  for (const map of Object.values(worldMaps)) {
+    const npc = map.npcs.find((item) => item.id === npcId);
+    if (npc) return npc.name;
+  }
+  return npcId;
+}
+
+function activeQuestSummary() {
+  const activeId = questIds.find((id) => ["accepted", "targetMet"].includes(questStatus(id)));
+  if (!activeId) return "";
+  const quest = sideQuestDefs[activeId];
+  return questStatus(activeId) === "targetMet"
+    ? `小任務：回去找 ${npcNameById(quest.returnTo)} 回報。`
+    : `小任務：前往 ${npcNameById(quest.target)}。`;
 }
 
 function updateHud() {
@@ -1092,11 +1308,9 @@ function updateHud() {
   modalProgress.textContent = map.title;
   questMini.textContent = state.started ? "進行中" : "開始";
   updateCardPreview(lastPreviewId, state.collected.has(lastPreviewId) ? "已收集。點圖鑑可查看其他字卡。" : undefined);
-  lessonText.textContent = state.lastLesson || "完成字卡挑戰後，這裡會留下可以在生活中練習的小任務。";
-
-  [...collectionGrid.children].forEach((button, index) => {
-    button.classList.toggle("collected", state.collected.has(index + 1));
-  });
+  renderCollectionGrid();
+  renderCardDetail();
+  renderQuestList();
 
   if (state.finished) {
     questText.textContent = "24 張雙語字卡都已完成。下一步可以擴充主線任務、角色成長、道具與更多地圖。";
@@ -1105,7 +1319,8 @@ function updateHud() {
   } else if (state.hearts === 0) {
     questText.textContent = "勇氣心用完也沒關係，可以繼續練習。按重新開始可從頭挑戰。";
   } else {
-    questText.textContent = `目前在「${map.title}」。找發光字卡完成挑戰，或踩上出口前往下一張地圖。`;
+    const sideQuestHint = activeQuestSummary();
+    questText.textContent = `目前在「${map.title}」。找發光字卡完成挑戰，或踩上出口前往下一張地圖。${sideQuestHint ? ` ${sideQuestHint}` : ""}`;
   }
 }
 
@@ -1137,16 +1352,21 @@ function loop(time) {
 
 const panelTitles = {
   quest: "任務資訊",
-  collection: "字卡圖鑑",
-  lesson: "學習筆記",
+  collection: "字卡圖鑑與學習筆記",
   controls: "操作說明"
 };
 
 function openInfoModal(panel = "quest") {
+  const activePanel = modalPanels[panel] ? panel : "quest";
+  if (activePanel === "collection") {
+    renderCollectionGrid();
+    renderCardDetail();
+  }
+  if (activePanel === "quest") renderQuestList();
   Object.entries(modalPanels).forEach(([key, element]) => {
-    element.classList.toggle("hidden", key !== panel);
+    element.classList.toggle("hidden", key !== activePanel);
   });
-  modalTitle.textContent = panelTitles[panel] ?? "資訊";
+  modalTitle.textContent = panelTitles[activePanel] ?? "資訊";
   infoModal.classList.remove("hidden");
 }
 

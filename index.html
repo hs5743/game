@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>雙語字卡學習村 RPG</title>
-    <link rel="stylesheet" href="styles.css?v=11" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23142017'/%3E%3Cpath d='M18 12h28a6 6 0 0 1 6 6v28a6 6 0 0 1-6 6H18a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6Z' fill='%23ffdc7b'/%3E%3Cpath d='M22 20h20v6H22zm0 10h16v5H22zm0 9h12v5H22z' fill='%23142017'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css?v=12" />
   </head>
   <body>
     <div class="ambient" aria-hidden="true"></div>
@@ -71,14 +72,16 @@
                 <div><span>所在區域</span><strong id="modalProgress">學習村廣場</strong></div>
                 <div><span>收集</span><strong id="collectionSummary">0 / 24</strong></div>
               </div>
+              <div id="questList" class="quest-list" aria-label="小任務列表"></div>
             </section>
 
             <section id="panelCollection" class="modal-panel hidden">
-              <div id="collectionGrid" class="collection-grid" aria-label="已收集字卡進度"></div>
-            </section>
-
-            <section id="panelLesson" class="modal-panel hidden">
-              <p id="lessonText">完成字卡挑戰後，這裡會留下可以在生活中練習的小任務。</p>
+              <div class="collection-layout">
+                <div id="collectionGrid" class="collection-grid" aria-label="字卡圖鑑"></div>
+                <article id="cardDetail" class="card-detail" aria-live="polite">
+                  <p class="empty-detail">點選已收集字卡查看圖案與學習筆記。</p>
+                </article>
+              </div>
             </section>
 
             <section id="panelControls" class="modal-panel hidden">
@@ -94,7 +97,7 @@
       </section>
 
       <aside class="hud" aria-label="遊戲資訊">
-        <div class="build-badge">Game UI v11</div>
+        <div class="build-badge">Game UI v12</div>
 
         <div class="active-card">
           <img id="cardImage" src="assets/cards/card-01.jpg" alt="字卡預覽" />
@@ -135,7 +138,7 @@
         <div class="hud-actions">
           <button type="button" data-panel="quest">任務</button>
           <button type="button" data-panel="collection">圖鑑</button>
-          <button type="button" data-panel="lesson">筆記</button>
+          <button type="button" data-panel="collection">筆記</button>
           <button type="button" data-panel="controls">操作</button>
         </div>
 
@@ -143,7 +146,7 @@
       </aside>
     </main>
 
-    <script src="card-art.js?v=11"></script>
-    <script src="game.js?v=11"></script>
+    <script src="card-art.js?v=12"></script>
+    <script src="game.js?v=12"></script>
   </body>
 </html>
