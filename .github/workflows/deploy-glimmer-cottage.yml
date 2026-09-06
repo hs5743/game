@@ -39,7 +39,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/glimmer-cottage
-          godot --headless --path glimmer-cottage --export-release Web build/glimmer-cottage/index.html
+          godot --headless --path glimmer-cottage --export-release Web ../build/glimmer-cottage/index.html
           touch build/.nojekyll
 
       - name: Keep the existing game at the site root
