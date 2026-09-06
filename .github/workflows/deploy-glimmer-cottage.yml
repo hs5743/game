@@ -1,0 +1,64 @@
+name: Deploy Glimmer Cottage Web
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "glimmer-cottage/**"
+      - ".github/workflows/deploy-web.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the existing site
+        uses: actions/checkout@v4
+
+      - name: Install Godot and Web export templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: "4.7.1"
+          use-dotnet: false
+
+      - name: Export the Godot game
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/glimmer-cottage
+          godot --headless --path glimmer-cottage --export-release Web build/glimmer-cottage/index.html
+          touch build/.nojekyll
+
+      - name: Keep the existing game at the site root
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in index.html styles.css game.js card-art.js; do
+            if [ -f "$file" ]; then cp "$file" "build/$file"; fi
+          done
+          if [ -d assets ]; then cp -R assets build/assets; fi
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
