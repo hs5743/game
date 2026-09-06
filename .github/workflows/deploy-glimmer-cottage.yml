@@ -38,6 +38,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 glimmer-cottage/tools/prepare_audio.py
           godot --headless --path glimmer-cottage --editor --import
           timeout 60 godot --headless --path glimmer-cottage -- --smoke-test
           mkdir -p build/glimmer-cottage
