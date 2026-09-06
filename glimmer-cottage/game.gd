@@ -149,7 +149,11 @@ func sign_text(parent: Node3D, text: String, pos: Vector3, size: int = 40, color
 	label.position = pos
 	return label
 
-func _font() -> SystemFont:
+func _font() -> Font:
+	if ResourceLoader.exists("res://fonts/NotoSansTC.ttf"):
+		var bundled = load("res://fonts/NotoSansTC.ttf")
+		if bundled is Font:
+			return bundled
 	var font = SystemFont.new()
 	font.font_names = PackedStringArray(["Microsoft JhengHei", "Noto Sans CJK TC", "Arial"])
 	return font
