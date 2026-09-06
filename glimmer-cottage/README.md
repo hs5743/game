@@ -43,7 +43,7 @@
 - 3D 模型、配色、角色露米、介面、音樂和提示音皆在本專案原創製作。
 - `audio/*.wav` 單字由本機 Windows Microsoft Zira Desktop 語音產生，供本機離線試玩。
 - `tests/create_audio.py` 使用 Python 標準函式庫產生原創背景旋律、鳥鳴與回饋音。
-- 中文使用電腦已安裝的 Microsoft JhengHei 系統字體，未複製或散布字型檔。
+- 網頁版內含只涵蓋遊戲介面所需字元的 Noto Sans TC 精簡字型（OFL-1.1），中文不依賴玩家電腦字型。
 - 使用寧靜日常奇幻的方向，沒有使用既有動漫角色、美術或配樂。
 - Godot 引擎為 MIT 授權：https://godotengine.org/license/
 

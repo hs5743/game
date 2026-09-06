@@ -8,6 +8,7 @@ const COLORS = [Color("dc7369"), Color("73a9cf"), Color("8aaa78"), Color("edc76c
 const WOOD = Color("715343")
 const CREAM = Color("f2e1b8")
 const INK = Color("374b49")
+const BUNDLED_FONT: Font = preload("res://fonts/NotoSansTC.ttf")
 
 var player: CharacterBody3D
 var camera: Camera3D
@@ -150,13 +151,7 @@ func sign_text(parent: Node3D, text: String, pos: Vector3, size: int = 40, color
 	return label
 
 func _font() -> Font:
-	if ResourceLoader.exists("res://fonts/NotoSansTC.ttf"):
-		var bundled = load("res://fonts/NotoSansTC.ttf")
-		if bundled is Font:
-			return bundled
-	var font = SystemFont.new()
-	font.font_names = PackedStringArray(["Microsoft JhengHei", "Noto Sans CJK TC", "Arial"])
-	return font
+	return BUNDLED_FONT
 
 func interact(id: String, pos: Vector3, size: Vector3) -> Node3D:
 	var root = Node3D.new()

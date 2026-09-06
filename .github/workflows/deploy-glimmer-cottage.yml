@@ -38,10 +38,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p glimmer-cottage/fonts
-          curl -L --fail --retry 3 "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanstc/NotoSansTC%5Bwght%5D.ttf" -o glimmer-cottage/fonts/NotoSansTC.ttf
+          godot --headless --path glimmer-cottage --editor --import
+          timeout 60 godot --headless --path glimmer-cottage -- --smoke-test
           mkdir -p build/glimmer-cottage
           godot --headless --path glimmer-cottage --export-release Web ../build/glimmer-cottage/index.html
+          cp glimmer-cottage/fonts/OFL.txt build/glimmer-cottage/OFL.txt
           touch build/.nojekyll
 
       - name: Keep the existing game at the site root
