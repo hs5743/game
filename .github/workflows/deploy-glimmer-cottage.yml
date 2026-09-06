@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - "glimmer-cottage/**"
-      - ".github/workflows/deploy-web.yml"
+      - ".github/workflows/deploy-glimmer-cottage.yml"
 
 permissions:
   contents: read
